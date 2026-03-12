@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import multer from "multer";
 import path from "path";
 import cors from "cors";
+import { setupPropertiesAPI } from "./properties.js";
 
 dotenv.config();
 const app = express();
@@ -144,6 +145,9 @@ app.get("/api/options", async (req, res) => {
     res.status(500).json({ error: error.message || "Options error" });
   }
 });
+
+// ------------------- Setup Properties API -------------------
+setupPropertiesAPI(app, db);
 
 // ------------------- Start Server -------------------
 app.listen(5000, "0.0.0.0", () => {
