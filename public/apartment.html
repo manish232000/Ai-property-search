@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apartment Management</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    h1 {
+      color: #333;
+    }
+    .back-btn {
+      background: #666;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .back-btn:hover {
+      background: #555;
+    }
+    .form-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .bhk-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 10px 0;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .apartments-list {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .apartment-card {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .apartment-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .apartment-info p {
+      color: #666;
+      font-size: 14px;
+      margin: 3px 0;
+    }
+    .apartment-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 12px;
+      background: #2196F3;
+    }
+    .btn-small.delete {
+      background: #f44336;
+    }
+    .btn-small:hover {
+      opacity: 0.8;
+    }
+    .message {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      display: none;
+    }
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    .price-tag {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏠 Apartment Management</h1>
+      <button class="back-btn" onclick="window.history.back()">← Back to Buildings</button>
+    </div>
+    
+    <div id="message" class="message"></div>
+
+    <div class="form-section">
+      <h2>Add New Apartment</h2>
+      <form id="apartmentForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>City *</label>
+            <select id="citySelect" required>
+              <option value="">Select City</option>
+              <option value="Jaipur">Jaipur</option>
+              <option value="Ajmer">Ajmer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Township *</label>
+            <select id="townshipSelect" required>
+              <option value="">Select Township First</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Project *</label>
+            <select id="projectSelect" required>
+              <option value="">Select Project First</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Building *</label>
+            <select name="building_id" id="buildingSelect" required>
+              <option value="">Select Building First</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Unit</label>
+            <input type="text" name="unit" pattern="[0-9]*" inputmode="numeric" placeholder="e.g., 1, 2, 3" title="Only digits allowed">
+          </div>
+          <div class="form-group">
+            <label>Apartment Number *</label>
+            <input type="text" name="apartment_number" required placeholder="e.g., 101, 201">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>BHK Types</label>
+            <div class="bhk-checkboxes">
+              <label class="checkbox-label">
+                <input type="checkbox" name="bhk" value="1"> 1 BHK
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="bhk" value="2"> 2 BHK
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="bhk" value="3"> 3 BHK
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="bhk" value="4"> 4 BHK
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="bhk" value="5"> 5 BHK
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="Available">Available</option>
+              <option value="Sold">Sold</option>
+              <option value="Reserved">Reserved</option>
+            </select>
+          </div>
+        </div>
+
+        
+         
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="margin-bottom: 8px; display: block;">Area From (sqft)</label>
+              <input type="number" id="areaFromFilter" placeholder="Min area" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div>
+              <label style="margin-bottom: 8px; display: block;">Area To (sqft)</label>
+              <input type="number" id="areaToFilter" placeholder="Max area" step="0.01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+              <button type="button" id="filterBtn" style="width: 100%; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">Filter by Area</button>
+            </div>
+          </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" name="price" required step="0.01">
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Amenities</label>
+            <textarea name="amenities" placeholder="e.g., Balcony, Parking, Gym access"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Image</label>
+            <input type="file" name="image" accept="image/*">
+          </div>
+        </div>
+
+        <button type="submit">Add Apartment</button>
+      </form>
+    </div>
+
+    
+
+         
+        </div>
+      </div>
+      <div id="apartmentsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let buildingId = null;
+    let allApartments = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('citySelect').addEventListener('change', loadTownships);
+      document.getElementById('townshipSelect').addEventListener('change', loadProjects);
+      document.getElementById('projectSelect').addEventListener('change', loadBuildings);
+      document.getElementById('buildingSelect').addEventListener('change', (e) => {
+        buildingId = e.target.value;
+        loadApartments();
+      });
+      document.getElementById('filterBtn').addEventListener('click', applyAreaFilter);
+      document.getElementById('priceFilterBtn').addEventListener('click', applyPriceFilter);
+      loadApartments();
+    });
+
+    async function loadTownships() {
+      const city = document.getElementById('citySelect').value;
+      const townshipSelect = document.getElementById('townshipSelect');
+      
+      if (!city) {
+        townshipSelect.innerHTML = '<option value="">Select Township First</option>';
+        document.getElementById('projectSelect').innerHTML = '<option value="">Select Project First</option>';
+        document.getElementById('buildingSelect').innerHTML = '<option value="">Select Building First</option>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/townships`);
+        const townships = await response.json();
+        
+        const filteredTownships = townships.filter(t => t.city === city);
+        
+        if (filteredTownships.length === 0) {
+          townshipSelect.innerHTML = '<option value="">No townships in this city</option>';
+          return;
+        }
+        
+        townshipSelect.innerHTML = `
+          <option value="">Select Township</option>
+          ${filteredTownships.map(t => `<option value="${t.township_id}">${t.name}</option>`).join('')}
+        `;
+      } catch (error) {
+        console.error('Error loading townships:', error);
+        showMessage('Error loading townships', 'error');
+      }
+    }
+
+    async function loadProjects() {
+      const townshipId = document.getElementById('townshipSelect').value;
+      const projectSelect = document.getElementById('projectSelect');
+      
+      if (!townshipId) {
+        projectSelect.innerHTML = '<option value="">Select Project First</option>';
+        document.getElementById('buildingSelect').innerHTML = '<option value="">Select Building First</option>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/township/${townshipId}/projects`);
+        const projects = await response.json();
+        
+        if (projects.length === 0) {
+          projectSelect.innerHTML = '<option value="">No projects in this township</option>';
+          return;
+        }
+        
+        projectSelect.innerHTML = `
+          <option value="">Select Project</option>
+          ${projects.map(p => `<option value="${p.project_id}">${p.name}</option>`).join('')}
+        `;
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        showMessage('Error loading projects', 'error');
+      }
+    }
+
+    async function loadBuildings() {
+      const projectId = document.getElementById('projectSelect').value;
+      const buildingSelect = document.getElementById('buildingSelect');
+      
+      if (!projectId) {
+        buildingSelect.innerHTML = '<option value="">Select Building First</option>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/project/${projectId}/buildings`);
+        const buildings = await response.json();
+        
+        if (buildings.length === 0) {
+          buildingSelect.innerHTML = '<option value="">No buildings in this project</option>';
+          return;
+        }
+        
+        buildingSelect.innerHTML = `
+          <option value="">Select Building</option>
+          ${buildings.map(b => `<option value="${b.building_id}">${b.name}${b.block ? ` (Block ${b.block})` : ''}</option>`).join('')}
+        `;
+      } catch (error) {
+        console.error('Error loading buildings:', error);
+        showMessage('Error loading buildings', 'error');
+      }
+    }
+
+    document.getElementById('apartmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const selectedBuildingId = document.getElementById('buildingSelect').value;
+      if (!selectedBuildingId) {
+        showMessage('Please select a building', 'error');
+        return;
+      }
+
+      // Get selected BHK types
+      const bhkCheckboxes = document.querySelectorAll('input[name="bhk"]:checked');
+      if (bhkCheckboxes.length === 0) {
+        showMessage('Please select at least one BHK type', 'error');
+        return;
+      }
+
+      const formData = new FormData(e.target);
+      formData.delete('bhk'); // Remove individual checkboxes
+      formData.set('building_id', selectedBuildingId);
+      
+      // Add all selected BHK values as comma-separated string
+      const selectedBhk = Array.from(bhkCheckboxes).map(cb => cb.value).join(',');
+      formData.set('bhk', selectedBhk);
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/apartment`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showMessage('Apartment added successfully!', 'success');
+          e.target.reset();
+          loadApartments();
+        } else {
+          showMessage(data.error || 'Error adding apartment', 'error');
+        }
+      } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+      }
+    });
+
+    async function loadApartments() {
+      if (!buildingId) {
+        document.getElementById('apartmentsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">Select a building first</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/building/${buildingId}/apartments`);
+        const apartments = await response.json();
+        allApartments = apartments;
+        
+        // Clear filter inputs
+        document.getElementById('priceFromFilter').value = '';
+        document.getElementById('priceToFilter').value = '';
+        document.getElementById('areaFromFilter').value = '';
+        document.getElementById('areaToFilter').value = '';
+        
+        displayApartments(apartments);
+      } catch (error) {
+        showMessage('Error loading apartments: ' + error.message, 'error');
+      }
+    }
+
+    function displayApartments(apartments) {
+      const listDiv = document.getElementById('apartmentsList');
+      
+      if (apartments.length === 0) {
+        listDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">No apartments added yet</p>';
+        return;
+      }
+      
+      listDiv.innerHTML = apartments.map(a => {
+        const bhkTypes = a.bhk.split(',').map(b => b.trim() + ' BHK').join(', ');
+        return `
+          <div class="apartment-card">
+            <div class="apartment-info">
+              <h3>Apartment #${a.apartment_number}${a.unit ? ` (Unit: ${a.unit})` : ''}</h3>
+              <p><strong>Floor:</strong> ${a.floor}</p>
+              <p><strong>BHK Types:</strong> ${bhkTypes}</p>
+              <p><strong>Carpet Area:</strong> ${a.carpet_area} sqft</p>
+              ${a.built_area ? `<p><strong>Built Area:</strong> ${a.built_area} sqft</p>` : ''}
+              <p><span class="price-tag">₹ ${parseFloat(a.price).toLocaleString('en-IN')}</span></p>
+              <p><strong>Status:</strong> <span class="status-badge">${a.status}</span></p>
+              ${a.amenities ? `<p><strong>Amenities:</strong> ${a.amenities}</p>` : ''}
+            </div>
+            <div class="apartment-actions">
+              <button class="btn-small delete" onclick="deleteApartment(${a.apartment_id})">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyAreaFilter() {
+      const areaFrom = parseFloat(document.getElementById('areaFromFilter').value) || 0;
+      const areaTo = parseFloat(document.getElementById('areaToFilter').value) || Infinity;
+      
+      const filtered = allApartments.filter(apt => {
+        const area = parseFloat(apt.carpet_area);
+        return area >= areaFrom && area <= areaTo;
+      });
+      
+      if (filtered.length === 0) {
+        showMessage(`No apartments found in area range ${areaFrom} - ${areaTo} sqft`, 'error');
+        displayApartments(allApartments);
+      } else {
+        displayApartments(filtered);
+        showMessage(`Found ${filtered.length} apartment(s) in area range ${areaFrom} - ${areaTo} sqft`, 'success');
+      }
+    }
+
+    function applyPriceFilter() {
+      const priceFrom = parseFloat(document.getElementById('priceFromFilter').value) || 0;
+      const priceTo = parseFloat(document.getElementById('priceToFilter').value) || Infinity;
+      
+      const filtered = allApartments.filter(apt => {
+        const price = parseFloat(apt.price);
+        return price >= priceFrom && price <= priceTo;
+      });
+      
+      if (filtered.length === 0) {
+        showMessage(`No apartments found in price range ₹${priceFrom.toLocaleString('en-IN')} - ₹${priceTo.toLocaleString('en-IN')}`, 'error');
+        displayApartments(allApartments);
+      } else {
+        displayApartments(filtered);
+        showMessage(`Found ${filtered.length} apartment(s) in price range ₹${priceFrom.toLocaleString('en-IN')} - ₹${priceTo.toLocaleString('en-IN')}`, 'success');
+      }
+    }
+
+    async function deleteApartment(id) {
+      if (!confirm('Are you sure?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/apartment/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          showMessage('Apartment deleted successfully!', 'success');
+          loadApartments();
+        } else {
+          showMessage('Error deleting apartment', 'error');
+        }
+      } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+      }
+    }
+
+    function showMessage(msg, type) {
+      const msgDiv = document.getElementById('message');
+      msgDiv.textContent = msg;
+      msgDiv.className = `message ${type}`;
+      setTimeout(() => msgDiv.className = 'message', 3000);
+    }
+  </script>
+</body>
+</html>

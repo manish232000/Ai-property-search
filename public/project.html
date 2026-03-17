@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    h1 {
+      color: #333;
+    }
+    .back-btn {
+      background: #666;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .back-btn:hover {
+      background: #555;
+    }
+    .form-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .projects-list {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .project-card {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .project-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .project-info p {
+      color: #666;
+      font-size: 14px;
+      margin: 3px 0;
+    }
+    .project-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 12px;
+      background: #2196F3;
+    }
+    .btn-small.delete {
+      background: #f44336;
+    }
+    .btn-small:hover {
+      opacity: 0.8;
+    }
+    .message {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      display: none;
+    }
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ Project Management</h1>
+      <a href="township.html" class="back-btn">← Back to Townships</a>
+    </div>
+    
+    <div id="message" class="message"></div>
+
+    <div class="form-section">
+      <h2>Add New Project</h2>
+      <form id="projectForm">
+        <div class="form-group">
+          <label>City *</label>
+          <select id="citySelect" required>
+            <option value="">Select City</option>
+            <option value="Jaipur">Jaipur</option>
+            <option value="Ajmer">Ajmer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Township *</label>
+          <select name="township_id" id="townshipSelect" required>
+            <option value="">Select Township First</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project Name *</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Phase</label>
+          <input type="text" name="phase" placeholder="e.g., Phase 1, Phase 2">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select name="status">
+            <option value="Planning">Planning</option>
+            <option value="Under Development">Under Development</option>
+            <option value="Ready to Launch">Ready to Launch</option>
+            <option value="Launched">Launched</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image</label>
+          <input type="file" name="image" accept="image/*">
+        </div>
+        <button type="submit">Add Project</button>
+      </form>
+    </div>
+
+    <div class="projects-list">
+      <h2 style="padding: 20px; border-bottom: 1px solid #eee;">All Projects</h2>
+      <div id="projectsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let townshipId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('citySelect').addEventListener('change', loadTownships);
+      document.getElementById('townshipSelect').addEventListener('change', (e) => {
+        townshipId = e.target.value;
+        loadProjects();
+      });
+      loadProjects();
+    });
+
+    async function loadTownships() {
+      const city = document.getElementById('citySelect').value;
+      const townshipSelect = document.getElementById('townshipSelect');
+      
+      if (!city) {
+        townshipSelect.innerHTML = '<option value="">Select Township First</option>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/townships`);
+        const townships = await response.json();
+        
+        const filteredTownships = townships.filter(t => t.city === city);
+        
+        if (filteredTownships.length === 0) {
+          townshipSelect.innerHTML = '<option value="">No townships in this city</option>';
+          return;
+        }
+        
+        townshipSelect.innerHTML = `
+          <option value="">Select Township</option>
+          ${filteredTownships.map(t => `<option value="${t.township_id}">${t.name}</option>`).join('')}
+        `;
+      } catch (error) {
+        console.error('Error loading townships:', error);
+        showMessage('Error loading townships', 'error');
+      }
+    }
+
+    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const selectedTownshipId = document.getElementById('townshipSelect').value;
+      if (!selectedTownshipId) {
+        showMessage('Please select a township', 'error');
+        return;
+      }
+
+      const formData = new FormData(e.target);
+      formData.set('township_id', selectedTownshipId);
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/project`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showMessage('Project added successfully!', 'success');
+          e.target.reset();
+          loadProjects();
+        } else {
+          showMessage(data.error || 'Error adding project', 'error');
+        }
+      } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+      }
+    });
+
+    async function loadProjects() {
+      if (!townshipId) {
+        document.getElementById('projectsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">Select a township first</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/township/${townshipId}/projects`);
+        const projects = await response.json();
+        
+        const listDiv = document.getElementById('projectsList');
+        
+        if (projects.length === 0) {
+          listDiv.innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">No projects added yet</p>';
+          return;
+        }
+        
+        listDiv.innerHTML = projects.map(p => `
+          <div class="project-card">
+            <div class="project-info">
+              <h3>${p.name}</h3>
+              ${p.phase ? `<p><strong>Phase:</strong> ${p.phase}</p>` : ''}
+              <p><strong>Status:</strong> <span class="status-badge">${p.status}</span></p>
+              ${p.description ? `<p>${p.description}</p>` : ''}
+            </div>
+            <div class="project-actions">
+              <button class="btn-small" onclick="viewBuildings(${p.project_id})">View Buildings</button>
+              <button class="btn-small delete" onclick="deleteProject(${p.project_id})">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        showMessage('Error loading projects: ' + error.message, 'error');
+      }
+    }
+
+    async function deleteProject(id) {
+      if (!confirm('Are you sure?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/project/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          showMessage('Project deleted successfully!', 'success');
+          loadProjects();
+        } else {
+          showMessage('Error deleting project', 'error');
+        }
+      } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+      }
+    }
+
+    function viewBuildings(projectId) {
+      window.location.href = `building.html?project_id=${projectId}`;
+    }
+
+    function showMessage(msg, type) {
+      const msgDiv = document.getElementById('message');
+      msgDiv.textContent = msg;
+      msgDiv.className = `message ${type}`;
+      setTimeout(() => msgDiv.className = 'message', 3000);
+    }
+  </script>
+</body>
+</html>
