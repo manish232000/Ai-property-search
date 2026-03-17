@@ -74,11 +74,15 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.log("📋 req.file:", req.file);
 
     const {
+      township_id, project_id, building_id,
       title, description, location, latitude, longitude, bhk,
       property_type, construction_type, construction_status,
       price, area_sqft, verified
     } = req.body;
     console.log("04. Destructured variables:");
+    console.log("    - township_id:", township_id);
+    console.log("    - project_id:", project_id);
+    console.log("    - building_id:", building_id);
     console.log("    - title:", title);
     console.log("    - description:", description);
     console.log("    - location:", location);
@@ -101,43 +105,50 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.log("07. ✓ Validation passed");
 
     // parse numbers & boolean
+    const townshipIdNum = township_id ? parseInt(township_id) : null;
+    console.log("08. townshipIdNum parsed:", townshipIdNum);
+    const projectIdNum = project_id ? parseInt(project_id) : null;
+    console.log("09. projectIdNum parsed:", projectIdNum);
+    const buildingIdNum = building_id ? parseInt(building_id) : null;
+    console.log("10. buildingIdNum parsed:", buildingIdNum);
     const latNum = latitude ? parseFloat(latitude) : null;
-    console.log("08. latNum parsed:", latNum);
+    console.log("11. latNum parsed:", latNum);
     const longNum = longitude ? parseFloat(longitude) : null;
-    console.log("09. longNum parsed:", longNum);
+    console.log("12. longNum parsed:", longNum);
     const bhkNum = bhk ? parseInt(bhk) : null;
-    console.log("10. bhkNum parsed:", bhkNum);
+    console.log("13. bhkNum parsed:", bhkNum);
     const priceNum = price ? parseFloat(price) : null;
-    console.log("11. priceNum parsed:", priceNum);
+    console.log("14. priceNum parsed:", priceNum);
     const areaNum = area_sqft ? parseInt(area_sqft) : null;
-    console.log("12. areaNum parsed:", areaNum);
+    console.log("15. areaNum parsed:", areaNum);
     const verifiedBool = verified === "1" ? 1 : 0;
-    console.log("13. verifiedBool parsed:", verifiedBool);
+    console.log("16. verifiedBool parsed:", verifiedBool);
 
     const image = req.file ? req.file.filename : null;
-    console.log("14. image filename:", image);
+    console.log("17. image filename:", image);
     const owner_id = 1;
-    console.log("15. owner_id:", owner_id);
+    console.log("18. owner_id:", owner_id);
 
     const sql = `
       INSERT INTO properties
-      (title,description,location,latitude,longitude,bhk,property_type,construction_type,construction_status,price,area_sqft,verified,owner_id,image)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      (township_id, project_id, building_id, title, description, location, latitude, longitude, bhk, property_type, construction_type, construction_status, price, area_sqft, verified, owner_id, image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    console.log("16. SQL Query prepared");
+    console.log("19. SQL Query prepared");
 
     const values = [
+      townshipIdNum, projectIdNum, buildingIdNum,
       title, description, location, latNum, longNum, bhkNum,
       property_type, construction_type, construction_status,
       priceNum, areaNum, verifiedBool, owner_id, image
     ];
-    console.log("17. SQL Values array:", values);
+    console.log("20. SQL Values array:", values);
     
-    console.log("18. Executing SQL...");
+    console.log("21. Executing SQL...");
     const result = await db.execute(sql, values);
-    console.log("19. SQL execution result:", result);
+    console.log("22. SQL execution result:", result);
 
-    console.log("20. Property added successfully");
+    console.log("23. Property added successfully");
     console.log("📤 Sending success response");
     res.json({ message: "Property added successfully!" });
 
@@ -183,6 +194,27 @@ app.get("/api/options", async (req, res) => {
     console.error("❌ Error code:", error.code);
     console.error("❌ Full error:", error);
     res.status(500).json({ error: error.message || "Options error" });
+  }
+});
+
+// ------------------- Delete Property -------------------
+app.delete("/api/properties/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("🔍 DELETE /api/properties/:id called with id:", id);
+    
+    const sql = "DELETE FROM properties WHERE property_id = ?";
+    const result = await db.execute(sql, [id]);
+    
+    if (result[0].affectedRows === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+    
+    console.log("✓ Property deleted successfully");
+    res.json({ message: "Property deleted successfully!" });
+  } catch (error) {
+    console.error("❌ Error deleting property:", error.message);
+    res.status(500).json({ error: error.message || "Delete error" });
   }
 });
 
