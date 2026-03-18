@@ -41,6 +41,8 @@ button:hover{background:#007bff;}
   <div class="nav-menu">
     <h3>📋 Management</h3>
     <a href="admin.html" class="active">🏠 Add Property</a>
+    <a href="city.html">🏙️ Cities</a>
+    <a href="amenities.html">✨ Amenities</a>
     <a href="township.html">🏘️ Townships</a>
     <a href="project.html">🏗️ Projects</a>
     <a href="building.html">🏢 Buildings</a>
@@ -121,11 +123,32 @@ const API_BASE = '/api';
 
 // Setup hierarchy dropdown listeners
 document.addEventListener('DOMContentLoaded', () => {
+  loadCities();
+  loadOptions();
   document.getElementById('citySelect').addEventListener('change', loadTownships);
   document.getElementById('townshipSelect').addEventListener('change', loadProjects);
   document.getElementById('projectSelect').addEventListener('change', loadBuildings);
   document.getElementById('property_type').addEventListener('change', toggleBuildingSection);
 });
+
+async function loadCities() {
+  try {
+    const response = await fetch(`${API_BASE}/cities`);
+    const cities = await response.json();
+    
+    const citySelect = document.getElementById('citySelect');
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city.name;
+      option.textContent = city.name;
+      citySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading cities:', error);
+  }
+}
 
 function toggleBuildingSection() {
   const propertyType = document.getElementById('property_type').value;
