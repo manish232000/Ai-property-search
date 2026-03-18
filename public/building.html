@@ -153,8 +153,6 @@
           <label>City *</label>
           <select id="citySelect" required>
             <option value="">Select City</option>
-            <option value="Jaipur">Jaipur</option>
-            <option value="Ajmer">Ajmer</option>
           </select>
         </div>
         <div class="form-group">
@@ -209,6 +207,7 @@
     let projectId = null;
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadCities();
       document.getElementById('citySelect').addEventListener('change', loadTownships);
       document.getElementById('townshipSelect').addEventListener('change', loadProjects);
       document.getElementById('projectSelect').addEventListener('change', (e) => {
@@ -217,6 +216,25 @@
       });
       loadBuildings();
     });
+
+    async function loadCities() {
+      try {
+        const response = await fetch(`${API_BASE}/cities`);
+        const cities = await response.json();
+        
+        const citySelect = document.getElementById('citySelect');
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        
+        cities.forEach(city => {
+          const option = document.createElement('option');
+          option.value = city.name;
+          option.textContent = city.name;
+          citySelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading cities:', error);
+      }
+    }
 
     async function loadTownships() {
       const city = document.getElementById('citySelect').value;

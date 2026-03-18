@@ -18,6 +18,8 @@ import { setupTownshipApis } from './township.js'
 import { setupProjectApis } from './project.js'
 import { setupBuildingApis } from './building.js'
 import { setupApartmentApis } from './apartment.js'
+import { setupCityApis } from './city.js'
+import { setupBhkApis } from './bhk.js'
 dotenv.config();
 const app = express();
 app.use(cors()); // optional
@@ -220,7 +222,8 @@ app.delete("/api/properties/:id", async (req, res) => {
 
 // ------------------- Setup Properties API -------------------
 setupPropertiesAPI(app, db);
-setupAmenityApis(app, db);
+await setupAmenityApis(app, db);
+await setupBhkApis(app, db);
 
 setupPropertiesAISearchAPIs(app, db);
 
@@ -237,6 +240,7 @@ setupTownshipApis(app, db, upload);
 setupProjectApis(app, db, upload);
 setupBuildingApis(app, db, upload);
 setupApartmentApis(app, db, upload);
+setupCityApis(app, db, upload);
   //const query = "need a house in 2 crore in jaipur";
 
   //const sqlQuery = await setupExampleWithPropertySchema(query);

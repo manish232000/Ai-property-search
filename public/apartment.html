@@ -169,6 +169,23 @@
       font-weight: bold;
       color: #1976d2;
     }
+    .amenities-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 10px 0;
+    }
+    .amenity-checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+    .amenity-checkbox-label input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -188,8 +205,6 @@
             <label>City *</label>
             <select id="citySelect" required>
               <option value="">Select City</option>
-              <option value="Jaipur">Jaipur</option>
-              <option value="Ajmer">Ajmer</option>
             </select>
           </div>
           <div class="form-group">
@@ -229,23 +244,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>BHK Types</label>
-            <div class="bhk-checkboxes">
-              <label class="checkbox-label">
-                <input type="checkbox" name="bhk" value="1"> 1 BHK
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" name="bhk" value="2"> 2 BHK
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" name="bhk" value="3"> 3 BHK
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" name="bhk" value="4"> 4 BHK
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" name="bhk" value="5"> 5 BHK
-              </label>
-            </div>
+            <div class="bhk-checkboxes" id="bhkContainer"></div>
           </div>
           <div class="form-group">
             <label>Status</label>
@@ -288,7 +287,7 @@
         <div class="form-row full">
           <div class="form-group">
             <label>Amenities</label>
-            <textarea name="amenities" placeholder="e.g., Balcony, Parking, Gym access"></textarea>
+            <div class="amenities-checkboxes" id="amenitiesContainer"></div>
           </div>
         </div>
 
@@ -318,6 +317,7 @@
     let allApartments = [];
 
     document.addEventListener('DOMContentLoaded', () => {
+      loadCities();
       document.getElementById('citySelect').addEventListener('change', loadTownships);
       document.getElementById('townshipSelect').addEventListener('change', loadProjects);
       document.getElementById('projectSelect').addEventListener('change', loadBuildings);
@@ -326,9 +326,83 @@
         loadApartments();
       });
       document.getElementById('filterBtn').addEventListener('click', applyAreaFilter);
-      document.getElementById('priceFilterBtn').addEventListener('click', applyPriceFilter);
+      loadAmenities();
+      loadBHK();
       loadApartments();
     });
+
+    async function loadCities() {
+      try {
+        const response = await fetch(`${API_BASE}/cities`);
+        const cities = await response.json();
+        
+        const citySelect = document.getElementById('citySelect');
+        citySelect.innerHTML = '<option value="">Select City</option>';
+        
+        cities.forEach(city => {
+          const option = document.createElement('option');
+          option.value = city.name;
+          option.textContent = city.name;
+          citySelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading cities:', error);
+      }
+    }
+
+    async function loadAmenities() {
+      try {
+        const response = await fetch(`${API_BASE}/amenities`);
+        const amenities = await response.json();
+        
+        const container = document.getElementById('amenitiesContainer');
+        container.innerHTML = '';
+        
+        if (!amenities || amenities.length === 0) {
+          container.innerHTML = '<p style="color: #999; font-size: 14px;">No amenities available. Add amenities from amenities management page.</p>';
+          return;
+        }
+        
+        amenities.forEach(amenity => {
+          const label = document.createElement('label');
+          label.className = 'amenity-checkbox-label';
+          label.innerHTML = `
+            <input type="checkbox" name="amenity" value="${amenity.name}">
+            ${amenity.icon ? amenity.icon + ' ' : ''}${amenity.name}
+          `;
+          container.appendChild(label);
+        });
+      } catch (error) {
+        console.error('Error loading amenities:', error);
+      }
+    }
+
+    async function loadBHK() {
+      try {
+        const response = await fetch(`${API_BASE}/bhk_options`);
+        const bhkOptions = await response.json();
+        
+        const container = document.getElementById('bhkContainer');
+        container.innerHTML = '';
+        
+        if (!bhkOptions || bhkOptions.length === 0) {
+          container.innerHTML = '<p style="color: #999; font-size: 14px;">No BHK options available.</p>';
+          return;
+        }
+        
+        bhkOptions.forEach(bhk => {
+          const label = document.createElement('label');
+          label.className = 'checkbox-label';
+          label.innerHTML = `
+            <input type="checkbox" name="bhk" value="${bhk.bhk}">
+            ${bhk.bhk} BHK
+          `;
+          container.appendChild(label);
+        });
+      } catch (error) {
+        console.error('Error loading BHK options:', error);
+      }
+    }
 
     async function loadTownships() {
       const city = document.getElementById('citySelect').value;
@@ -435,6 +509,10 @@
         return;
       }
 
+      // Get selected amenities
+      const amenityCheckboxes = document.querySelectorAll('input[name="amenity"]:checked');
+      const selectedAmenities = Array.from(amenityCheckboxes).map(cb => cb.value).join(',');
+
       const formData = new FormData(e.target);
       formData.delete('bhk'); // Remove individual checkboxes
       formData.set('building_id', selectedBuildingId);
@@ -442,6 +520,7 @@
       // Add all selected BHK values as comma-separated string
       const selectedBhk = Array.from(bhkCheckboxes).map(cb => cb.value).join(',');
       formData.set('bhk', selectedBhk);
+      formData.set('amenities', selectedAmenities);
       
       try {
         const response = await fetch(`${API_BASE}/admin/apartment`, {
