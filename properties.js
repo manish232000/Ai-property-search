@@ -1,11 +1,10 @@
 // properties.js - API for filtering properties
 
 export function setupPropertiesAPI(app, db) {
-  
+
   // ------------------- Filter Properties -------------------
   app.get("/api/properties", async (req, res) => {
     try {
-<<<<<<< HEAD
       console.log("🔍 GET /api/properties called");
       console.log("📋 Raw req.query:", JSON.stringify(req.query, null, 2));
       console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
@@ -20,7 +19,7 @@ export function setupPropertiesAPI(app, db) {
       console.log("   - property_type:", property_type);
       console.log("   - construction_type:", construction_type);
       console.log("   - construction_status:", construction_status);
-      
+
       let sql = `SELECT * FROM properties WHERE 1=1`;
       const params = [];
       console.log("🏗️  Initial SQL:", sql);
@@ -94,65 +93,12 @@ export function setupPropertiesAPI(app, db) {
       console.log("🚀 Executing query...");
 
       const [properties] = await db.execute(sql, params);
-      
+
       console.log("📊 Query result:");
       console.log("   - Rows returned:", properties.length);
       console.log("   - Sample data:", properties.slice(0, 2)); // First 2 rows
       console.log("📤 Sending response with", properties.length, "properties");
 
-=======
-      console.log("GET /api/properties called");
-      console.log("Query params:", req.query);
-
-      const { city, bhk, minPrice, maxPrice, type, construction_type } = req.query;
-      
-      let sql = `SELECT * FROM properties WHERE 1=1`;
-      const params = [];
-
-      // Build dynamic WHERE clause
-      if (city) {
-        sql += ` AND location = ?`;
-        params.push(city);
-        console.log("✓ Filter: city =", city);
-      }
-
-      if (bhk) {
-        sql += ` AND bhk = ?`;
-        params.push(parseInt(bhk));
-        console.log("✓ Filter: bhk =", bhk);
-      }
-
-      if (minPrice) {
-        sql += ` AND price >= ?`;
-        params.push(parseFloat(minPrice));
-        console.log("✓ Filter: minPrice >=", minPrice);
-      }
-
-      if (maxPrice) {
-        sql += ` AND price <= ?`;
-        params.push(parseFloat(maxPrice));
-        console.log("✓ Filter: maxPrice <=", maxPrice);
-      }
-
-      if (type) {
-        sql += ` AND property_type = ?`;
-        params.push(type);
-        console.log("✓ Filter: type =", type);
-      }
-
-      if (construction_type) {
-        sql += ` AND construction_type = ?`;
-        params.push(construction_type);
-        console.log("✓ Filter: construction_type =", construction_type);
-      }
-
-      console.log("Final SQL:", sql);
-      console.log("Parameters:", params);
-
-      const [properties] = await db.execute(sql, params);
-      
-      console.log(`Found ${properties.length} properties`);
->>>>>>> a5dcead (Initial commit with database file)
       res.json({ 
         success: true,
         count: properties.length,
@@ -160,13 +106,9 @@ export function setupPropertiesAPI(app, db) {
       });
 
     } catch (error) {
-<<<<<<< HEAD
       console.error("❌ Error in GET /api/properties:", error.message);
       console.error("❌ Error code:", error.code);
       console.error("❌ Full error:", error);
-=======
-      console.error("Error in GET /api/properties:", error.message);
->>>>>>> a5dcead (Initial commit with database file)
       res.status(500).json({ 
         success: false,
         error: error.message || "Server error" 
@@ -177,7 +119,6 @@ export function setupPropertiesAPI(app, db) {
   // ------------------- Get Single Property -------------------
   app.get("/api/properties/:id", async (req, res) => {
     try {
-<<<<<<< HEAD
       console.log("🔍 GET /api/properties/:id called");
       console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
       console.log("📋 req.query:", JSON.stringify(req.query, null, 2));
@@ -196,39 +137,23 @@ export function setupPropertiesAPI(app, db) {
       console.log("   - Rows returned:", properties.length);
       if (properties.length === 0) {
         console.log("❌ No property found with ID:", req.params.id);
-=======
-      console.log("GET /api/properties/:id called - ID:", req.params.id);
-
-      const sql = `SELECT * FROM properties WHERE property_id = ?`;
-      const [properties] = await db.execute(sql, [req.params.id]);
-
-      if (properties.length === 0) {
->>>>>>> a5dcead (Initial commit with database file)
         return res.status(404).json({ 
           success: false,
           error: "Property not found" 
         });
       }
 
-<<<<<<< HEAD
       console.log("✅ Property found:", properties[0].title);
       console.log("📤 Sending response with property data");
-=======
-      console.log("Property found:", properties[0].title);
->>>>>>> a5dcead (Initial commit with database file)
       res.json({ 
         success: true,
         data: properties[0] 
       });
 
     } catch (error) {
-<<<<<<< HEAD
       console.error("❌ Error in GET /api/properties/:id:", error.message);
       console.error("❌ Error code:", error.code);
       console.error("❌ Full error:", error);
-=======
-      console.error("Error in GET /api/properties/:id:", error.message);
->>>>>>> a5dcead (Initial commit with database file)
       res.status(500).json({ 
         success: false,
         error: error.message || "Server error" 
@@ -239,7 +164,6 @@ export function setupPropertiesAPI(app, db) {
   // ------------------- Get All Properties (No Filter) -------------------
   app.get("/api/all-properties", async (req, res) => {
     try {
-<<<<<<< HEAD
       console.log("🔍 GET /api/all-properties called");
       console.log("📋 req.query:", JSON.stringify(req.query, null, 2));
       console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
@@ -258,14 +182,6 @@ export function setupPropertiesAPI(app, db) {
       console.log("   - Sample data:", properties.slice(0, 2)); // First 2 rows
       console.log("📤 Sending response with all properties");
 
-=======
-      console.log("GET /api/all-properties called");
-
-      const sql = `SELECT * FROM properties`;
-      const [properties] = await db.execute(sql);
-
-      console.log(`Total properties: ${properties.length}`);
->>>>>>> a5dcead (Initial commit with database file)
       res.json({ 
         success: true,
         count: properties.length,
@@ -273,13 +189,9 @@ export function setupPropertiesAPI(app, db) {
       });
 
     } catch (error) {
-<<<<<<< HEAD
       console.error("❌ Error in GET /api/all-properties:", error.message);
       console.error("❌ Error code:", error.code);
       console.error("❌ Full error:", error);
-=======
-      console.error("Error in GET /api/all-properties:", error.message);
->>>>>>> a5dcead (Initial commit with database file)
       res.status(500).json({ 
         success: false,
         error: error.message || "Server error" 
