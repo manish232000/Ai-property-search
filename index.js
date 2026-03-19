@@ -197,6 +197,7 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     
     console.log("21. Executing SQL...");
     const result = await db.execute(sql, values);
+    
     console.log("22. SQL execution result:", result);
 
     console.log("23. Property added successfully");
@@ -227,6 +228,24 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   }
 });
 
+  app.get("/api/property/:id/amenities", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.execute(`
+      SELECT a.amenity_id, a.name, a.icon
+      FROM amenities a
+      JOIN property_amenities_map pam 
+        ON a.amenity_id = pam.amenity_id
+      WHERE pam.property_id = ?
+    `, [id]);
+
+    res.json(rows);
+  } catch (error) {
+    console.error("❌ Error fetching amenities:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
 // ------------------- Dropdown Options -------------------
 app.get("/api/options", async (req, res) => {
   try {
