@@ -37,22 +37,18 @@ export function setupBhkApis(app, db) {
   };
   
   // Initialize tables on startup
-  // Initialize tables properly
-(async () => {
-  await initTables();
-})();
+  initTables();
   
   // ------------------- Get All BHK Options -------------------
   app.get("/api/bhk_options", async (req, res) => {
     try {
       const sql = `
-        SELECT  bhk
+        SELECT bhk_id, bhk, description
         FROM bhk_options
         ORDER BY bhk ASC
       `;
       
       const [bhkOptions] = await db.execute(sql);
-          console.log("BHK DATA:", bhkOptions); 
       res.json(bhkOptions);
     } catch (error) {
       console.error("❌ ERROR:", error.message);

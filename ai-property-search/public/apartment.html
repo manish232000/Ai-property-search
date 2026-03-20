@@ -276,14 +276,6 @@
             
            
           </div>
-          <div class="form-group">
-  <label>Floor *</label>
-  <input type="number" name="floor" required placeholder="e.g., 1, 2, 3">
-</div>
-<div class="form-group">
-  <label>Carpet Area (sqft) *</label>
-  <input type="number" name="carpet_area" required placeholder="e.g., 1200">
-</div>
 
         <div class="form-row">
           <div class="form-group">
@@ -562,15 +554,10 @@
         allApartments = apartments;
         
         // Clear filter inputs
-       const priceFrom = document.getElementById('priceFromFilter');
-const priceTo = document.getElementById('priceToFilter');
-const areaFrom = document.getElementById('areaFromFilter');
-const areaTo = document.getElementById('areaToFilter');
-
-if (priceFrom) priceFrom.value = '';
-if (priceTo) priceTo.value = '';
-if (areaFrom) areaFrom.value = '';
-if (areaTo) areaTo.value = '';
+        document.getElementById('priceFromFilter').value = '';
+        document.getElementById('priceToFilter').value = '';
+        document.getElementById('areaFromFilter').value = '';
+        document.getElementById('areaToFilter').value = '';
         
         displayApartments(apartments);
       } catch (error) {

@@ -4,13 +4,41 @@ import mysql from "mysql2/promise";
 import multer from "multer";
 import path from "path";
 import cors from "cors";
+<<<<<<< HEAD
+import fs from "fs";
+import { setupPropertiesAPI } from "./properties.js";
+import { setupAmenityApis } from "./amenities.js";
+import { setupPropertiesAISearchAPIs } from "./propertyAISearch.js";
+import { setupExampleWithPropertySchema } from "./exampleWithPropertySchema.js";
+import { setupExampleDB } from "./exampleDB.js";
+import {setupPractice} from './Practice.js'
+import {setupConstructiontype} from './setupConstructiontype.js'
+import {setupConstructionStatus} from './construction_status.js'
+import {property_typeSetup} from './Propertytype.js'
+import { setupTownshipApis } from './township.js'
+import { setupProjectApis } from './project.js'
+import { setupBuildingApis } from './building.js'
+import { setupApartmentApis } from './apartment.js'
+import { setupCityApis } from './city.js'
+import { setupBhkApis } from './bhk.js'
+=======
 import { setupPropertiesAPI } from "./properties.js";
 
+>>>>>>> a5dcead (Initial commit with database file)
 dotenv.config();
 const app = express();
 app.use(cors()); // optional
 app.use(express.json());
 
+<<<<<<< HEAD
+// Create uploads folder if it doesn't exist
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+  console.log("✓ Created uploads folder");
+}
+
+=======
+>>>>>>> a5dcead (Initial commit with database file)
 // Serve static files & uploads
 app.use(express.static("public"));
 app.use("/uploads", express.static(path.join("uploads")));
@@ -49,16 +77,33 @@ try {
 // ------------------- Add Property -------------------
 app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   try {
+<<<<<<< HEAD
+    console.log("🔍 POST /api/admin/property called");
+    console.log("📋 req.query:", JSON.stringify(req.query, null, 2));
+    console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
+    console.log("📋 req.body:", JSON.stringify(req.body, null, 2));
+    console.log("📋 req.file:", req.file);
+
+    const {
+      township_id, project_id, building_id,
+=======
     console.log("01. POST /api/admin/property called");
     console.log("02. req.body:", req.body);
     console.log("03. req.file:", req.file);
 
     const {
+>>>>>>> a5dcead (Initial commit with database file)
       title, description, location, latitude, longitude, bhk,
       property_type, construction_type, construction_status,
       price, area_sqft, verified
     } = req.body;
     console.log("04. Destructured variables:");
+<<<<<<< HEAD
+    console.log("    - township_id:", township_id);
+    console.log("    - project_id:", project_id);
+    console.log("    - building_id:", building_id);
+=======
+>>>>>>> a5dcead (Initial commit with database file)
     console.log("    - title:", title);
     console.log("    - description:", description);
     console.log("    - location:", location);
@@ -81,6 +126,41 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.log("07. ✓ Validation passed");
 
     // parse numbers & boolean
+<<<<<<< HEAD
+    const townshipIdNum = township_id ? parseInt(township_id) : null;
+    console.log("08. townshipIdNum parsed:", townshipIdNum);
+    const projectIdNum = project_id ? parseInt(project_id) : null;
+    console.log("09. projectIdNum parsed:", projectIdNum);
+    const buildingIdNum = building_id ? parseInt(building_id) : null;
+    console.log("10. buildingIdNum parsed:", buildingIdNum);
+    const latNum = latitude ? parseFloat(latitude) : null;
+    console.log("11. latNum parsed:", latNum);
+    const longNum = longitude ? parseFloat(longitude) : null;
+    console.log("12. longNum parsed:", longNum);
+    const bhkNum = bhk ? parseInt(bhk) : null;
+    console.log("13. bhkNum parsed:", bhkNum);
+    const priceNum = price ? parseFloat(price) : null;
+    console.log("14. priceNum parsed:", priceNum);
+    const areaNum = area_sqft ? parseInt(area_sqft) : null;
+    console.log("15. areaNum parsed:", areaNum);
+    const verifiedBool = verified === "1" ? 1 : 0;
+    console.log("16. verifiedBool parsed:", verifiedBool);
+
+    const image = req.file ? req.file.filename : null;
+    console.log("17. image filename:", image);
+    const owner_id = 1;
+    console.log("18. owner_id:", owner_id);
+
+    const sql = `
+      INSERT INTO properties
+      (township_id, project_id, building_id, title, description, location, latitude, longitude, bhk, property_type, construction_type, construction_status, price, area_sqft, verified, owner_id, image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    console.log("19. SQL Query prepared");
+
+    const values = [
+      townshipIdNum, projectIdNum, buildingIdNum,
+=======
     const latNum = latitude ? parseFloat(latitude) : null;
     console.log("08. latNum parsed:", latNum);
     const longNum = longitude ? parseFloat(longitude) : null;
@@ -107,10 +187,28 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.log("16. SQL Query prepared");
 
     const values = [
+>>>>>>> a5dcead (Initial commit with database file)
       title, description, location, latNum, longNum, bhkNum,
       property_type, construction_type, construction_status,
       priceNum, areaNum, verifiedBool, owner_id, image
     ];
+<<<<<<< HEAD
+    console.log("20. SQL Values array:", values);
+    
+    console.log("21. Executing SQL...");
+    const result = await db.execute(sql, values);
+    console.log("22. SQL execution result:", result);
+
+    console.log("23. Property added successfully");
+    console.log("📤 Sending success response");
+    res.json({ message: "Property added successfully!" });
+
+  } catch (error) {
+    console.error("❌ ERROR caught:", error.message);
+    console.error("❌ Error code:", error.code);
+    console.error("❌ Full error:", error);
+    console.log("📤 Sending error response");
+=======
     console.log("17. SQL Values array:", values);
     
     console.log("18. Executing SQL...");
@@ -124,6 +222,7 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.error("ERROR caught:", error.message);
     console.error("Error code:", error.code);
     console.error("Full error:", error);
+>>>>>>> a5dcead (Initial commit with database file)
     res.status(500).json({ error: error.message || "Server error" });
   }
 });
@@ -131,6 +230,37 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
 // ------------------- Dropdown Options -------------------
 app.get("/api/options", async (req, res) => {
   try {
+<<<<<<< HEAD
+    console.log("🔍 GET /api/options called");
+    console.log("📋 req.query:", JSON.stringify(req.query, null, 2));
+    console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
+    console.log("📋 req.body:", JSON.stringify(req.body, null, 2));
+
+    console.log("🚀 Fetching bhk options...");
+    const [bhk] = await db.execute(`SELECT DISTINCT bhk FROM bhk_options ORDER BY bhk ASC`);
+    console.log("   - BHK options:", bhk);
+
+    console.log("🚀 Fetching property_type options...");
+    const [ptype] = await db.execute(`SELECT DISTINCT name FROM property_types ORDER BY name ASC`);
+    console.log("   - Property type options:", ptype);
+
+    console.log("🚀 Fetching construction_type options...");
+    const [ctype] = await db.execute(`SELECT DISTINCT name FROM construction_types ORDER BY name ASC`);
+    console.log("   - Construction type options:", ctype);
+
+    console.log("🚀 Fetching construction_status options...");
+    const [status] = await db.execute(`SELECT DISTINCT name FROM construction_statuses ORDER BY name ASC`);
+    console.log("   - Construction status options:", status);
+
+    const response = { bhk, property_type: ptype, construction_type: ctype, construction_status: status };
+    console.log("📤 Sending options response:", { counts: { bhk: bhk.length, ptype: ptype.length, ctype: ctype.length, status: status.length } });
+    res.json(response);
+
+  } catch (error) {
+    console.error("❌ Error in GET /api/options:", error.message);
+    console.error("❌ Error code:", error.code);
+    console.error("❌ Full error:", error);
+=======
     console.log("GET /api/options called");
     const [bhk] = await db.execute(`SELECT DISTINCT bhk FROM properties ORDER BY bhk ASC`);
     const [ptype] = await db.execute(`SELECT DISTINCT property_type FROM properties`);
@@ -142,13 +272,64 @@ app.get("/api/options", async (req, res) => {
 
   } catch (error) {
     console.error("Error in GET /api/options:", error.message);
+>>>>>>> a5dcead (Initial commit with database file)
     res.status(500).json({ error: error.message || "Options error" });
+  }
+});
+
+<<<<<<< HEAD
+// ------------------- Delete Property -------------------
+app.delete("/api/properties/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("🔍 DELETE /api/properties/:id called with id:", id);
+    
+    const sql = "DELETE FROM properties WHERE property_id = ?";
+    const result = await db.execute(sql, [id]);
+    
+    if (result[0].affectedRows === 0) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+    
+    console.log("✓ Property deleted successfully");
+    res.json({ message: "Property deleted successfully!" });
+  } catch (error) {
+    console.error("❌ Error deleting property:", error.message);
+    res.status(500).json({ error: error.message || "Delete error" });
   }
 });
 
 // ------------------- Setup Properties API -------------------
 setupPropertiesAPI(app, db);
+await setupAmenityApis(app, db);
+await setupBhkApis(app, db);
 
+setupPropertiesAISearchAPIs(app, db);
+
+//setupExample(app, db);
+setupExampleWithPropertySchema(app, db);
+setupExampleDB(app,db);
+setupPractice(app,db)
+setupConstructiontype(app,db)
+setupConstructionStatus(app,db)
+property_typeSetup(app,db)
+
+// ------------------- Setup Township Hierarchy APIs -------------------
+setupTownshipApis(app, db, upload);
+setupProjectApis(app, db, upload);
+setupBuildingApis(app, db, upload);
+setupApartmentApis(app, db, upload);
+setupCityApis(app, db, upload);
+  //const query = "need a house in 2 crore in jaipur";
+
+  //const sqlQuery = await setupExampleWithPropertySchema(query);
+
+  //console.log("Generated SQL Query:\n", sqlQuery);
+=======
+// ------------------- Setup Properties API -------------------
+setupPropertiesAPI(app, db);
+
+>>>>>>> a5dcead (Initial commit with database file)
 // ------------------- Start Server -------------------
 app.listen(5000, "0.0.0.0", () => {
   console.log("\n✓✓✓ Server running on port 5000 ✓✓✓");
