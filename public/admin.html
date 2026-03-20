@@ -3,7 +3,6 @@
 <head>
 <title>Admin Panel</title>
 <style>
-<<<<<<< HEAD
 body{font-family:Arial;background:linear-gradient(135deg,#00f2fe,#4facfe);display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px;}
 .main-container{display:grid;grid-template-columns:200px 1fr;gap:20px;max-width:1200px;width:100%;}
 .nav-menu{background:white;padding:15px;border-radius:12px;height:fit-content;box-shadow:0 8px 20px rgba(0,0,0,0.2);}
@@ -13,17 +12,11 @@ body{font-family:Arial;background:linear-gradient(135deg,#00f2fe,#4facfe);displa
 .nav-menu a.active{background:#007bff;}
 .container{background:white;padding:20px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.2);}
 h2{margin-top:0;color:#333;font-size:18px;}
-=======
-body{font-family:Arial;background:linear-gradient(135deg,#00f2fe,#4facfe);display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}
-.container{background:white;padding:15px;border-radius:12px;width:320px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 20px rgba(0,0,0,0.2);}
-h2{text-align:center;margin-bottom:10px;color:#333;font-size:18px;}
->>>>>>> a5dcead (Initial commit with database file)
 input,textarea,select{width:100%;padding:6px;margin-top:4px;margin-bottom:8px;border-radius:6px;border:1px solid #ccc;font-size:12px;}
 textarea{height:45px;}
 button{width:100%;padding:8px;background:#4facfe;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer;}
 button:hover{background:#007bff;}
 .latlong{display:flex;gap:8px;}
-<<<<<<< HEAD
 .latlong input{flex:1;}
 #preview{width:100%;margin-top:5px;border-radius:6px;display:none;}
 .form-section{margin-bottom:30px;}
@@ -99,15 +92,6 @@ button:hover{background:#007bff;}
   </select>
 </div>
 
-=======
-#preview{width:100%;margin-top:5px;border-radius:6px;display:none;}
-</style>
-</head>
-<body>
-<div class="container">
-<h2>Add Property</h2>
-<form id="propertyForm">
->>>>>>> a5dcead (Initial commit with database file)
 <input id="title" placeholder="Title">
 <textarea id="description" placeholder="Description"></textarea>
 <input id="location" placeholder="Location">
@@ -116,10 +100,6 @@ button:hover{background:#007bff;}
 <input id="longitude" placeholder="Longitude">
 </div>
 <select id="bhk"><option value="">Select BHK</option></select>
-<<<<<<< HEAD
-=======
-<select id="property_type"><option value="">Select Property Type</option></select>
->>>>>>> a5dcead (Initial commit with database file)
 <select id="construction_type"><option value="">Select Construction Type</option></select>
 <select id="construction_status"><option value="">Select Construction Status</option></select>
 <input id="price" placeholder="Price">
@@ -132,7 +112,6 @@ button:hover{background:#007bff;}
 </form>
 </div>
 
-<<<<<<< HEAD
 <div class="properties-list">
 <h3>📦 All Properties</h3>
 <div id="propertiesList"></div>
@@ -269,9 +248,6 @@ async function loadBuildings() {
   }
 }
 
-=======
-<script>
->>>>>>> a5dcead (Initial commit with database file)
 async function loadOptions(){
   try {
     const res = await fetch("/api/options");
@@ -288,46 +264,28 @@ async function loadOptions(){
           document.getElementById("bhk").appendChild(opt);
       });
     }
-<<<<<<< HEAD
     console.log('data.property_type:', data.property_type);
     if(data.property_type && data.property_type.length > 0) {
       data.property_type.forEach(item=>{
           const opt=document.createElement("option");
           opt.value=item.name;
           opt.text=item.name;
-=======
-    if(data.property_type && data.property_type.length > 0) {
-      data.property_type.forEach(item=>{
-          const opt=document.createElement("option");
-          opt.value=item.property_type;
-          opt.text=item.property_type;
->>>>>>> a5dcead (Initial commit with database file)
           document.getElementById("property_type").appendChild(opt);
       });
     }
     if(data.construction_type && data.construction_type.length > 0) {
       data.construction_type.forEach(item=>{
           const opt=document.createElement("option");
-<<<<<<< HEAD
           opt.value=item.name;
           opt.text=item.name;
-=======
-          opt.value=item.construction_type;
-          opt.text=item.construction_type;
->>>>>>> a5dcead (Initial commit with database file)
           document.getElementById("construction_type").appendChild(opt);
       });
     }
     if(data.construction_status && data.construction_status.length > 0) {
       data.construction_status.forEach(item=>{
           const opt=document.createElement("option");
-<<<<<<< HEAD
           opt.value=item.name;
           opt.text=item.name;
-=======
-          opt.value=item.construction_status;
-          opt.text=item.construction_status;
->>>>>>> a5dcead (Initial commit with database file)
           document.getElementById("construction_status").appendChild(opt);
       });
     }
@@ -361,7 +319,6 @@ async function addProperty(){
       }
       
       const formData=new FormData();
-<<<<<<< HEAD
       // Add hierarchy IDs if available
       const township_id = document.getElementById("townshipSelect").value;
       const project_id = document.getElementById("projectSelect").value;
@@ -372,8 +329,6 @@ async function addProperty(){
       if(building_id) formData.append("building_id", building_id);
       
       // Add all form fields
-=======
->>>>>>> a5dcead (Initial commit with database file)
       ["title","description","location","latitude","longitude","bhk","property_type","construction_type","construction_status","price","area_sqft","verified"].forEach(id=>{
           formData.append(id, document.getElementById(id).value);
       });
@@ -382,10 +337,7 @@ async function addProperty(){
 
       console.log("Submitting form...");
       const res=await fetch("/api/admin/property",{ method:"POST", body:formData });
-<<<<<<< HEAD
       console.log("Raw response:", res);
-=======
->>>>>>> a5dcead (Initial commit with database file)
       const data=await res.json();
       
       console.log("Response:", data);
@@ -395,10 +347,7 @@ async function addProperty(){
           alert("✓ Property Added Successfully");
           document.getElementById("propertyForm").reset();
           document.getElementById("preview").style.display="none";
-<<<<<<< HEAD
           loadProperties();
-=======
->>>>>>> a5dcead (Initial commit with database file)
       } else {
           alert("Error: "+(data.error || "Unknown error"));
       }
@@ -407,7 +356,6 @@ async function addProperty(){
       alert("Error: " + err.message);
     }
 }
-<<<<<<< HEAD
 
 async function loadProperties(){
   try {
@@ -489,8 +437,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </div>
 </div>
-=======
-</script>
->>>>>>> a5dcead (Initial commit with database file)
 </body>
 </html>
