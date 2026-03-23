@@ -18,6 +18,7 @@ function groupProperties(rows) {
       spec_value,
        overview_title,
       overview_value,
+      distance_meters,
       ...rest
     } = row;
 
@@ -57,7 +58,8 @@ function groupProperties(rows) {
         map[property_id].places.push({
           place_id,
           place_name,
-          place_category
+          place_category,
+          distance_meters: Number(distance_meters).toFixed(2)
         });
       }
     }
@@ -111,6 +113,15 @@ function groupProperties(rows) {
     pl.place_id,
     pl.name AS place_name,
     pl.category AS place_category,
+    (
+  6371000 * ACOS(
+    COS(RADIANS(p.latitude)) *
+    COS(RADIANS(pl.latitude)) *
+    COS(RADIANS(pl.longitude) - RADIANS(p.longitude)) +
+    SIN(RADIANS(p.latitude)) *
+    SIN(RADIANS(pl.latitude))
+  )
+) AS distance_meters,
 
     ps.spec_key,
     ps.spec_value,
@@ -253,6 +264,15 @@ function groupProperties(rows) {
     pl.place_id,
     pl.name AS place_name,
     pl.category AS place_category,
+    (
+  6371000 * ACOS(
+    COS(RADIANS(p.latitude)) *
+    COS(RADIANS(pl.latitude)) *
+    COS(RADIANS(pl.longitude) - RADIANS(p.longitude)) +
+    SIN(RADIANS(p.latitude)) *
+    SIN(RADIANS(pl.latitude))
+  )
+) AS distance_meters,
 
     ps.spec_key,
     ps.spec_value,
@@ -333,6 +353,15 @@ function groupProperties(rows) {
     pl.place_id,
     pl.name AS place_name,
     pl.category AS place_category,
+    (
+  6371000 * ACOS(
+    COS(RADIANS(p.latitude)) *
+    COS(RADIANS(pl.latitude)) *
+    COS(RADIANS(pl.longitude) - RADIANS(p.longitude)) +
+    SIN(RADIANS(p.latitude)) *
+    SIN(RADIANS(pl.latitude))
+  )
+) AS distance_meters,
 
     ps.spec_key,
     ps.spec_value,

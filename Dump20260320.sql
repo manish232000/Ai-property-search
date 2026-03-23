@@ -99,7 +99,7 @@ CREATE TABLE `bhk_options` (
 
 LOCK TABLES `bhk_options` WRITE;
 /*!40000 ALTER TABLE `bhk_options` DISABLE KEYS */;
-INSERT INTO `bhk_options` VALUES (0),(1),(2),(3),(4),(5),(6),(7),(10),(33),(333),(342);
+INSERT INTO `bhk_options` VALUES (1),(2),(3),(4),(5),(6),(7);
 /*!40000 ALTER TABLE `bhk_options` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -160,7 +160,7 @@ CREATE TABLE `cities` (
 
 LOCK TABLES `cities` WRITE;
 /*!40000 ALTER TABLE `cities` DISABLE KEYS */;
-INSERT INTO `cities` VALUES (1,'Varanasi','Uttar Pradesh','Clean and Religious place','1773817288684-Screenshot (1).png','2026-03-18 07:01:28'),(2,'Agra','Uttar Pradesh','Tajmahal visting place','1773817421005-Screenshot (2).png','2026-03-18 07:03:41'),(3,'Jaunpur','Uttar Pradesh','Good city',NULL,'2026-03-18 07:15:24'),(4,'Lucknow','Uttar Pradesh','Nawabo ka sahar',NULL,'2026-03-20 06:44:21');
+INSERT INTO `cities` VALUES (1,'Jaipur','Rajasthan','Fort and Religious place','1773817288684-Screenshot (1).png','2026-03-18 07:01:28'),(2,'Agra','Uttar Pradesh','Tajmahal visting place','1773817421005-Screenshot (2).png','2026-03-18 07:03:41'),(3,'Jaunpur','Uttar Pradesh','Good city',NULL,'2026-03-18 07:15:24'),(4,'Ajmer','Rajasthan','Khwaja Gharib Nawaz Dargah Sharif.',NULL,'2026-03-20 06:44:21');
 /*!40000 ALTER TABLE `cities` ENABLE KEYS */;
 UNLOCK TABLES;
 
