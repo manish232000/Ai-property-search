@@ -1,6 +1,70 @@
-// properties.js - API for filtering properties
+
 
 export function setupPropertiesAPI(app, db) {
+
+  function groupProperties(rows) {
+  const map = {};
+
+  rows.forEach(row => {
+    const {
+      property_id,
+      property_name,
+      price,
+      amenity_id,
+      amenity_name,
+      place_id,
+      place_name,
+      place_category,
+      ...rest
+    } = row;
+
+    if (!map[property_id]) {
+      map[property_id] = {
+        property_id,
+        property_name,
+        price,
+        ...rest,
+        amenities: [],
+        places: []
+      };
+    }
+
+    // ✅ AMENITIES (duplicate remove)
+    if (amenity_id) {
+      const existsAmenity = map[property_id].amenities.find(
+        a => a.amenity_id === amenity_id
+      );
+
+      if (!existsAmenity) {
+        map[property_id].amenities.push({
+          amenity_id,
+          amenity_name
+        });
+      }
+    }
+
+    // ✅ PLACES (duplicate remove)
+    if (place_id) {
+      const existsPlace = map[property_id].places.find(
+        p => p.place_id === place_id
+      );
+
+      if (!existsPlace) {
+        map[property_id].places.push({
+          place_id,
+          place_name,
+          place_category
+        });
+      }
+    }
+
+  });
+
+  return Object.values(map);
+}
+          
+
+// properties.js - API for filtering properties
   
   // ------------------- Filter Properties -------------------
   app.get("/api/properties", async (req, res) => {
@@ -20,7 +84,24 @@ export function setupPropertiesAPI(app, db) {
       console.log("   - construction_type:", construction_type);
       console.log("   - construction_status:", construction_status);
       
-      let sql = `SELECT * FROM properties WHERE 1=1`;
+      let sql = `
+  SELECT 
+    p.*, 
+    p.title AS property_name,
+    a.amenity_id,
+    a.name AS amenity_name,
+      pl.place_id,
+    pl.name AS place_name,
+    pl.category AS place_category
+  FROM properties p
+  LEFT JOIN property_amenities_map pa 
+    ON p.property_id = pa.property_id
+  LEFT JOIN amenities a 
+    ON pa.amenity_id = a.amenity_id
+    LEFT JOIN places pl 
+  ON p.location COLLATE utf8mb4_unicode_ci = pl.city COLLATE utf8mb4_unicode_ci
+  WHERE 1=1
+`;
       const params = [];
       console.log("🏗️  Initial SQL:", sql);
       console.log("🏗️  Initial params:", params);
@@ -93,17 +174,17 @@ export function setupPropertiesAPI(app, db) {
       console.log("🚀 Executing query...");
 
       const [properties] = await db.execute(sql, params);
-      
+      const groupedData = groupProperties(properties);
       console.log("📊 Query result:");
       console.log("   - Rows returned:", properties.length);
       console.log("   - Sample data:", properties.slice(0, 2)); // First 2 rows
       console.log("📤 Sending response with", properties.length, "properties");
 
       res.json({ 
-        success: true,
-        count: properties.length,
-        data: properties 
-      });
+  success: true,
+  count: groupedData.length,
+  data: groupedData 
+});
 
     } catch (error) {
       console.error("❌ Error in GET /api/properties:", error.message);
@@ -125,13 +206,29 @@ export function setupPropertiesAPI(app, db) {
       console.log("📋 req.body:", JSON.stringify(req.body, null, 2));
       console.log("🆔 Property ID from params:", req.params.id);
 
-      const sql = `SELECT * FROM properties WHERE property_id = ?`;
+      const sql = `
+  SELECT 
+    p.*, 
+    p.title AS property_name,
+    a.amenity_id,
+    a.name AS amenity_name,
+     pl.place_id,
+          pl.name AS place_name,
+          pl.category AS place_category
+  FROM properties p
+  LEFT JOIN property_amenities_map pa 
+    ON p.property_id = pa.property_id
+  LEFT JOIN amenities a 
+    ON pa.amenity_id = a.amenity_id
+  WHERE p.property_id = ?
+`;
       const params = [req.params.id];
       console.log("✅ SQL query:", sql);
       console.log("✅ Parameters:", params);
       console.log("🚀 Executing query...");
 
       const [properties] = await db.execute(sql, params);
+      const groupedData = groupProperties(properties);
 
       console.log("📊 Query result:");
       console.log("   - Rows returned:", properties.length);
@@ -147,7 +244,7 @@ export function setupPropertiesAPI(app, db) {
       console.log("📤 Sending response with property data");
       res.json({ 
         success: true,
-        data: properties[0] 
+        data: groupedData[0]
       });
 
     } catch (error) {
@@ -169,13 +266,28 @@ export function setupPropertiesAPI(app, db) {
       console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
       console.log("📋 req.body:", JSON.stringify(req.body, null, 2));
 
-      const sql = `SELECT * FROM properties`;
+      const sql = `
+  SELECT 
+    p.*, 
+    p.title AS property_name,
+    a.amenity_id,
+    a.name AS amenity_name,
+     pl.place_id,
+          pl.name AS place_name,
+          pl.category AS place_category
+  FROM properties p
+  LEFT JOIN property_amenities_map pa 
+    ON p.property_id = pa.property_id
+  LEFT JOIN amenities a 
+    ON pa.amenity_id = a.amenity_id
+`;
       const params = [];
       console.log("✅ SQL query:", sql);
       console.log("✅ Parameters:", params);
       console.log("🚀 Executing query...");
 
       const [properties] = await db.execute(sql);
+      const groupedData = groupProperties(properties);
 
       console.log("📊 Query result:");
       console.log("   - Total properties:", properties.length);
@@ -185,7 +297,7 @@ export function setupPropertiesAPI(app, db) {
       res.json({ 
         success: true,
         count: properties.length,
-        data: properties 
+        data: groupedData
       });
 
     } catch (error) {

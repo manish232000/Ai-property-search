@@ -18,7 +18,7 @@ export function setupApartmentApis(app, db, upload) {
 
       const image = req.file ? req.file.filename : null;
       const floorNum = parseInt(floor);
-      const bhkNum = parseInt(bhk);
+      const bhkValue = bhk;
       const carpetAreaNum = parseFloat(carpet_area);
       const builtAreaNum = built_area ? parseFloat(built_area) : null;
       const priceNum = parseFloat(price);
@@ -28,7 +28,7 @@ export function setupApartmentApis(app, db, upload) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      const values = [building_id, unit || null, apartment_number, floorNum, bhkNum, carpetAreaNum, builtAreaNum, priceNum, status || "Available", amenities, image];
+      const values = [building_id, unit || null, apartment_number, floorNum, bhkValue, carpetAreaNum, builtAreaNum, priceNum, status || "Available", amenities, image];
       const result = await db.execute(sql, values);
 
       res.json({ 
