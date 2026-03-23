@@ -1,8 +1,7 @@
 
 
 export function setupPropertiesAPI(app, db) {
-
-  function groupProperties(rows) {
+function groupProperties(rows) {
   const map = {};
 
   rows.forEach(row => {
@@ -15,9 +14,14 @@ export function setupPropertiesAPI(app, db) {
       place_id,
       place_name,
       place_category,
+      spec_key,
+      spec_value,
+       overview_title,
+      overview_value,
       ...rest
     } = row;
 
+    // ✅ property initialize
     if (!map[property_id]) {
       map[property_id] = {
         property_id,
@@ -25,17 +29,18 @@ export function setupPropertiesAPI(app, db) {
         price,
         ...rest,
         amenities: [],
-        places: []
+        places: [],
+        specifications: {},
+          overview: {}// ✅ VERY IMPORTANT
       };
     }
 
-    // ✅ AMENITIES (duplicate remove)
+    // ✅ amenities
     if (amenity_id) {
-      const existsAmenity = map[property_id].amenities.find(
+      const exists = map[property_id].amenities.find(
         a => a.amenity_id === amenity_id
       );
-
-      if (!existsAmenity) {
+      if (!exists) {
         map[property_id].amenities.push({
           amenity_id,
           amenity_name
@@ -43,19 +48,30 @@ export function setupPropertiesAPI(app, db) {
       }
     }
 
-    // ✅ PLACES (duplicate remove)
+    // ✅ places
     if (place_id) {
-      const existsPlace = map[property_id].places.find(
+      const exists = map[property_id].places.find(
         p => p.place_id === place_id
       );
-
-      if (!existsPlace) {
+      if (!exists) {
         map[property_id].places.push({
           place_id,
           place_name,
           place_category
         });
       }
+    }
+
+    // ✅ specifications (SAFE FIX)
+    if (spec_key && spec_value) {
+      if (!map[property_id].specifications) {
+        map[property_id].specifications = {};
+      }
+
+      map[property_id].specifications[spec_key] = spec_value;
+    }
+    if (overview_title && overview_value) {
+      map[property_id].overview[overview_title] = overview_value;
     }
 
   });
@@ -88,19 +104,39 @@ export function setupPropertiesAPI(app, db) {
   SELECT 
     p.*, 
     p.title AS property_name,
+
     a.amenity_id,
     a.name AS amenity_name,
-      pl.place_id,
+
+    pl.place_id,
     pl.name AS place_name,
-    pl.category AS place_category
-  FROM properties p
-  LEFT JOIN property_amenities_map pa 
+    pl.category AS place_category,
+
+    ps.spec_key,
+    ps.spec_value,
+
+    po.title AS overview_title,
+    po.value AS overview_value
+
+   FROM properties p
+
+    LEFT JOIN property_amenities_map pa 
     ON p.property_id = pa.property_id
-  LEFT JOIN amenities a 
+
+    LEFT JOIN amenities a 
     ON pa.amenity_id = a.amenity_id
+
     LEFT JOIN places pl 
-  ON p.location COLLATE utf8mb4_unicode_ci = pl.city COLLATE utf8mb4_unicode_ci
-  WHERE 1=1
+    ON p.location COLLATE utf8mb4_unicode_ci = pl.city COLLATE utf8mb4_unicode_ci
+
+    LEFT JOIN property_specifications ps 
+    ON p.property_id = ps.property_id
+
+    LEFT JOIN property_overview po 
+    ON p.property_id = po.property_id
+
+
+   WHERE 1=1
 `;
       const params = [];
       console.log("🏗️  Initial SQL:", sql);
@@ -181,9 +217,9 @@ export function setupPropertiesAPI(app, db) {
       console.log("📤 Sending response with", properties.length, "properties");
 
       res.json({ 
-  success: true,
-  count: groupedData.length,
-  data: groupedData 
+     success: true,
+     count: groupedData.length,
+     data: groupedData 
 });
 
     } catch (error) {
@@ -210,16 +246,36 @@ export function setupPropertiesAPI(app, db) {
   SELECT 
     p.*, 
     p.title AS property_name,
+
     a.amenity_id,
     a.name AS amenity_name,
-     pl.place_id,
-          pl.name AS place_name,
-          pl.category AS place_category
-  FROM properties p
-  LEFT JOIN property_amenities_map pa 
+
+    pl.place_id,
+    pl.name AS place_name,
+    pl.category AS place_category,
+
+    ps.spec_key,
+    ps.spec_value,
+    po.title AS overview_title,
+    po.value AS overview_value
+
+   FROM properties p
+
+    LEFT JOIN property_amenities_map pa 
     ON p.property_id = pa.property_id
-  LEFT JOIN amenities a 
+
+   LEFT JOIN amenities a 
     ON pa.amenity_id = a.amenity_id
+
+   LEFT JOIN places pl 
+    ON p.location COLLATE utf8mb4_unicode_ci = pl.city COLLATE utf8mb4_unicode_ci
+
+   LEFT JOIN property_specifications ps 
+    ON p.property_id = ps.property_id
+
+    LEFT JOIN property_overview po 
+    ON p.property_id = po.property_id
+
   WHERE p.property_id = ?
 `;
       const params = [req.params.id];
@@ -266,20 +322,39 @@ export function setupPropertiesAPI(app, db) {
       console.log("📋 req.params:", JSON.stringify(req.params, null, 2));
       console.log("📋 req.body:", JSON.stringify(req.body, null, 2));
 
-      const sql = `
+     const sql = `
   SELECT 
     p.*, 
     p.title AS property_name,
+
     a.amenity_id,
     a.name AS amenity_name,
-     pl.place_id,
-          pl.name AS place_name,
-          pl.category AS place_category
-  FROM properties p
-  LEFT JOIN property_amenities_map pa 
+
+    pl.place_id,
+    pl.name AS place_name,
+    pl.category AS place_category,
+
+    ps.spec_key,
+    ps.spec_value,
+    po.title AS overview_title,
+   po.value AS overview_value
+
+   FROM properties p
+
+   LEFT JOIN property_amenities_map pa 
     ON p.property_id = pa.property_id
-  LEFT JOIN amenities a 
+
+   LEFT JOIN amenities a 
     ON pa.amenity_id = a.amenity_id
+
+    LEFT JOIN places pl 
+    ON p.location COLLATE utf8mb4_unicode_ci = pl.city COLLATE utf8mb4_unicode_ci
+
+    LEFT JOIN property_specifications ps 
+    ON p.property_id = ps.property_id
+
+    LEFT JOIN property_overview po 
+    ON p.property_id = po.property_id
 `;
       const params = [];
       console.log("✅ SQL query:", sql);
