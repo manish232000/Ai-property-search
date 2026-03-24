@@ -87,7 +87,8 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   avg_price,
   possession_date,
   configuration,
-  rera_id
+  rera_id,
+  nearby_places
     } = req.body;
     console.log("04. Destructured variables:");
     console.log("    - township_id:", township_id);
@@ -149,9 +150,9 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
 
     project_units, project_area, size, project_size,
     launch_date, avg_price, 
-    configuration, rera_id
+    configuration, rera_id,nearby_places
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
 `;
     console.log("19. SQL Query prepared");
 
@@ -169,7 +170,8 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   avg_price,
   
   configuration,
-  rera_id
+  rera_id,
+  nearby_places ? JSON.stringify(JSON.parse(nearby_places)) : null
 ];
     console.log("20. SQL Values array:", values);
     

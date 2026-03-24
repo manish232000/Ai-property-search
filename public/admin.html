@@ -146,6 +146,13 @@ button:hover{background:#007bff;}
 
 <input id="price" placeholder="Price">
 
+
+<h3>Around This Project</h3>
+
+<div id="nearbyContainer"></div>
+
+<button type="button" onclick="addNearbyRow()">+ Add Place</button>
+
 <select id="verified"><option value="1">Verified</option><option value="0">Not Verified</option></select>
 <label>Upload Property Image</label>
 <input type="file" id="image" accept="image/*" onchange="previewImage(event)">
@@ -173,6 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('projectSelect').addEventListener('change', loadBuildings);
   document.getElementById('property_type').addEventListener('change', toggleBuildingSection);
 });
+
+     function addNearbyRow() {
+  const container = document.getElementById("nearbyContainer");
+
+  const div = document.createElement("div");
+  div.style.display = "flex";
+  div.style.gap = "10px";
+  div.style.marginBottom = "8px";
+
+  div.innerHTML = `
+    <input placeholder="Place Name" class="nearby_name">
+    <input placeholder="Distance (meters)" class="nearby_distance">
+    <button type="button" onclick="this.parentElement.remove()">❌</button>
+  `;
+
+  container.appendChild(div);
+}
 
 async function loadCities() {
   try {
@@ -387,8 +411,35 @@ async function addProperty(){
           alert("Please fill Title, Description, and Location!");
           return;
       }
+
+      const nearbyPlaces = [];
+
+document.querySelectorAll("#nearbyContainer > div").forEach(row => {
+  const name = row.querySelector(".nearby_name").value;
+  const distance = row.querySelector(".nearby_distance").value;
+
+  if (name && distance) {
+    nearbyPlaces.push({
+      name,
+      distance
+    });
+  }
+});
+  const formData=new FormData();
+
+  document.querySelectorAll("#nearbyContainer > div").forEach(row => {
+  const name = row.querySelector(".nearby_name").value;
+  const distance = row.querySelector(".nearby_distance").value;
+
+  if (name && distance) {
+    nearbyPlaces.push({ name, distance });
+  }
+});
+
+formData.append("nearby_places", JSON.stringify(nearbyPlaces));
+
       
-      const formData=new FormData();
+      
       // Add hierarchy IDs if available
       const township_id = document.getElementById("townshipSelect").value;
       const project_id = document.getElementById("projectSelect").value;
