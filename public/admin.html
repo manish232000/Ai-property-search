@@ -33,7 +33,24 @@ button:hover{background:#007bff;}
 .btn-small.delete{background:#f44336;}
 .btn-small.delete:hover{background:#da190b;}
 .no-properties{padding:20px;text-align:center;color:#999;}
-@media(max-width:768px){.main-container{grid-template-columns:1fr;}.nav-menu{display:grid;grid-template-columns:repeat(2,1fr);height:auto;}}
+.amenities-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 10px 0;
+    }
+    .amenity-checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+    .amenity-checkbox-label input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+     @media(max-width:768px){.main-container{grid-template-columns:1fr;}.nav-menu{display:grid;grid-template-columns:repeat(2,1fr);height:auto;}}
 </style>
 </head>
 <body>
@@ -102,8 +119,33 @@ button:hover{background:#007bff;}
 <select id="bhk"><option value="">Select BHK</option></select>
 <select id="construction_type"><option value="">Select Construction Type</option></select>
 <select id="construction_status"><option value="">Select Construction Status</option></select>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <h3>Amenities</h3>
+            <div class="amenities-checkboxes" id="amenitiesContainer"></div>
+          </div>
+        </div>
+        <input id="area_sqft" placeholder="Area Sqft">
+
+        <!-- ✅ OVERVIEW SECTION -->
+<h3>Project Overview</h3>
+
+<input id="project_units" placeholder="Project Units">
+<input id="project_area" placeholder="Project Area">
+<input id="size" placeholder="Size">
+<input id="project_size" placeholder="Project Size">
+
+<input id="launch_date" type="date" placeholder="Launch Date">
+<input id="avg_price" placeholder="Average Price">
+
+
+<input id="configuration" placeholder="Configuration">
+<input id="rera_id" placeholder="RERA ID">
+
+
 <input id="price" placeholder="Price">
-<input id="area_sqft" placeholder="Area Sqft">
+
 <select id="verified"><option value="1">Verified</option><option value="0">Not Verified</option></select>
 <label>Upload Property Image</label>
 <input type="file" id="image" accept="image/*" onchange="previewImage(event)">
@@ -125,6 +167,7 @@ const API_BASE = '/api';
 document.addEventListener('DOMContentLoaded', () => {
   loadCities();
   loadOptions();
+   loadAmenities();
   document.getElementById('citySelect').addEventListener('change', loadTownships);
   document.getElementById('townshipSelect').addEventListener('change', loadProjects);
   document.getElementById('projectSelect').addEventListener('change', loadBuildings);
@@ -294,6 +337,33 @@ async function loadOptions(){
     alert("Warning: Could not load dropdown options. DB might be empty.\nBut you can still submit!");
   }
 }
+async function loadAmenities() {
+      try {
+        const response = await fetch(`${API_BASE}/amenities`);
+        const amenities = await response.json();
+        
+        const container = document.getElementById('amenitiesContainer');
+        container.innerHTML = '';
+        
+        if (!amenities || amenities.length === 0) {
+          container.innerHTML = '<p style="color: #999; font-size: 14px;">No amenities available. Add amenities from amenities management page.</p>';
+          return;
+        }
+        
+        amenities.forEach(amenity => {
+          const label = document.createElement('label');
+          label.className = 'amenity-checkbox-label';
+          label.innerHTML = `
+            <input type="checkbox" name="amenity" value="${amenity.amenity_id}">
+            ${amenity.icon ? amenity.icon + ' ' : ''}${amenity.name}
+          `;
+          container.appendChild(label);
+        });
+      } catch (error) {
+        console.error('Error loading amenities:', error);
+      }
+    }
+
 
 
 function previewImage(event){
@@ -329,9 +399,39 @@ async function addProperty(){
       if(building_id) formData.append("building_id", building_id);
       
       // Add all form fields
-      ["title","description","location","latitude","longitude","bhk","property_type","construction_type","construction_status","price","area_sqft","verified"].forEach(id=>{
-          formData.append(id, document.getElementById(id).value);
-      });
+    [
+ "title","description","location","latitude","longitude","bhk",
+ "property_type","construction_type","construction_status",
+ "price","area_sqft","verified",
+
+ "project_units","project_area","size","project_size",
+ "launch_date","avg_price","possession_date",
+ "configuration","rera_id"
+
+].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    formData.append(id, el ? el.value : "");
+  } else {
+    console.warn("Missing field:", id);
+  }
+});
+console.log("Sending data:");
+[
+ "project_units","project_area","size","project_size",
+ "launch_date","avg_price","possession_date",
+ "configuration","rera_id"
+].forEach(id => {
+  const el = document.getElementById(id);
+  console.log(id, el ? el.value : "NOT FOUND");
+});
+      // ✅ Amenities collect karna
+const selectedAmenities = [];
+document.querySelectorAll('input[name="amenity"]:checked').forEach(cb => {
+  selectedAmenities.push(cb.value);
+});
+
+formData.append("amenities", JSON.stringify(selectedAmenities));
       const imageFile=document.getElementById("image").files[0];
       if(imageFile) formData.append("image", imageFile);
 

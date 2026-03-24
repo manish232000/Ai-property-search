@@ -79,7 +79,15 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
       township_id, project_id, building_id,
       title, description, location, latitude, longitude, bhk,
       property_type, construction_type, construction_status,
-      price, area_sqft, verified
+      price, area_sqft, verified, project_units,
+  project_area,
+  size,
+  project_size,
+  launch_date,
+  avg_price,
+  possession_date,
+  configuration,
+  rera_id
     } = req.body;
     console.log("04. Destructured variables:");
     console.log("    - township_id:", township_id);
@@ -132,22 +140,42 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     console.log("18. owner_id:", owner_id);
 
     const sql = `
-      INSERT INTO properties
-      (township_id, project_id, building_id, title, description, location, latitude, longitude, bhk, property_type, construction_type, construction_status, price, area_sqft, verified, owner_id, image)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+  INSERT INTO properties
+  (
+    township_id, project_id, building_id,
+    title, description, location, latitude, longitude, bhk,
+    property_type, construction_type, construction_status,
+    price, area_sqft, verified, owner_id, image,
+
+    project_units, project_area, size, project_size,
+    launch_date, avg_price, 
+    configuration, rera_id
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
     console.log("19. SQL Query prepared");
 
     const values = [
-      townshipIdNum, projectIdNum, buildingIdNum,
-      title, description, location, latNum, longNum, bhkNum,
-      property_type, construction_type, construction_status,
-      priceNum, areaNum, verifiedBool, owner_id, image
-    ];
+  townshipIdNum, projectIdNum, buildingIdNum,
+  title, description, location, latNum, longNum, bhkNum,
+  property_type, construction_type, construction_status,
+  priceNum, areaNum, verifiedBool, owner_id, image,
+
+  project_units,
+  project_area,
+  size,
+  project_size,
+  launch_date,
+  avg_price,
+  
+  configuration,
+  rera_id
+];
     console.log("20. SQL Values array:", values);
     
     console.log("21. Executing SQL...");
     const result = await db.execute(sql, values);
+    
     
     console.log("22. SQL execution result:", result);
 
