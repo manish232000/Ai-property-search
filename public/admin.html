@@ -50,6 +50,15 @@ button:hover{background:#007bff;}
       margin-right: 8px;
       cursor: pointer;
     }
+    .btn-white {
+  background: #fff !important;
+  color: #333 !important;
+  border: 1px solid #ccc !important;
+}
+
+.btn-white:hover {
+  background: #f1f1f1 !important;
+}
      @media(max-width:768px){.main-container{grid-template-columns:1fr;}.nav-menu{display:grid;grid-template-columns:repeat(2,1fr);height:auto;}}
 </style>
 </head>
@@ -153,6 +162,15 @@ button:hover{background:#007bff;}
 
 <button type="button" onclick="addNearbyRow()">+ Add Place</button>
 
+<h3>Specifications</h3>
+
+<div id="specContainer"></div>
+
+<button type="button" onclick="addFloor()">+ Add Floor Specification</button>
+<div id="fittingContainer"></div>
+
+<button type="button" onclick="addFitting()">+ Add Fitting Specification</button>
+
 <select id="verified"><option value="1">Verified</option><option value="0">Not Verified</option></select>
 <label>Upload Property Image</label>
 <input type="file" id="image" accept="image/*" onchange="previewImage(event)">
@@ -170,6 +188,93 @@ button:hover{background:#007bff;}
 <script>
 const API_BASE = '/api';
 
+
+function addFloor() {
+  const container = document.getElementById("specContainer");
+
+  const floorDiv = document.createElement("div");
+  floorDiv.style.border = "1px solid #ccc";
+  floorDiv.style.padding = "10px";
+  floorDiv.style.marginBottom = "10px";
+
+  floorDiv.innerHTML = `
+  
+
+    <div class="specRows">
+      <div style="display:flex; gap:10px; margin-top:5px;">
+        <input placeholder="Label" class="spec_label">
+        <input placeholder="Value" class="spec_value">
+      </div>
+    </div>
+
+    <button type="button" onclick="this.parentElement.remove()">❌ Remove Floor</button>
+  `;
+
+  container.appendChild(floorDiv);
+}
+
+  
+
+function addSpecRow(btn) {
+  const specContainer = btn.previousElementSibling;
+
+  const row = document.createElement("div");
+  row.style.display = "flex";
+  row.style.gap = "10px";
+  row.style.marginTop = "5px";
+
+  row.innerHTML = `
+    <input placeholder="Label" class="spec_label">
+    <input placeholder="Value" class="spec_value">
+    <button type="button" onclick="this.parentElement.remove()">❌</button>
+  `;
+
+  specContainer.appendChild(row);
+}
+
+  
+
+  function addFitting() {
+  const container = document.getElementById("specContainer"); // same container use kar rahe
+
+  const fitDiv = document.createElement("div");
+  fitDiv.style.border = "1px solid #ccc";
+  fitDiv.style.padding = "10px";
+  fitDiv.style.marginBottom = "10px";
+
+  fitDiv.innerHTML = `
+  
+
+    <div class="specRows">
+      <div style="display:flex; gap:10px; margin-top:5px;">
+        <input placeholder="Label" class="spec_label">
+        <input placeholder="Value" class="spec_value">
+      </div>
+    </div>
+
+    <button type="button" onclick="this.parentElement.remove()">❌ Remove Fitting</button>
+  `;
+
+  container.appendChild(fitDiv);
+}
+
+
+   function addSpecRow(btn) {
+  const specContainer = btn.previousElementSibling;
+
+  const row = document.createElement("div");
+  row.style.display = "flex";
+  row.style.gap = "10px";
+  row.style.marginTop = "5px";
+
+  row.innerHTML = `
+    <input placeholder="Label" class="spec_label">
+    <input placeholder="Value" class="spec_value">
+    <button type="button" onclick="this.parentElement.remove()">❌</button>
+  `;
+
+  specContainer.appendChild(row);
+}
 // Setup hierarchy dropdown listeners
 document.addEventListener('DOMContentLoaded', () => {
   loadCities();
@@ -437,6 +542,69 @@ document.querySelectorAll("#nearbyContainer > div").forEach(row => {
 });
 
 formData.append("nearby_places", JSON.stringify(nearbyPlaces));
+
+   const specifications = [];
+
+// ✅ FLOORS
+document.querySelectorAll("#specContainer > div").forEach(floor => {
+  const floorName = floor.querySelector(".floor_name")?.value;
+
+  const specs = [];
+
+  floor.querySelectorAll(".specRows > div").forEach(row => {
+    const label = row.querySelector(".spec_label")?.value;
+    const value = row.querySelector(".spec_value")?.value;
+
+    if (label && value) {
+      specs.push({ label, value });
+    }
+  });
+
+  if (specs.length > 0) {
+    specifications.push({
+      
+      floor: floorName ||"General",
+      data: specs
+    });
+  }
+});
+
+
+// ✅ FITTINGS
+document.querySelectorAll("#fittingContainer > div").forEach(fitting => {
+  const fittingName = fitting.querySelector(".fitting_name")?.value;
+
+  const specs = [];
+
+  fitting.querySelectorAll(".specRows > div").forEach(row => {
+    const label = row.querySelector(".spec_label")?.value;
+    const value = row.querySelector(".spec_value")?.value;
+
+    if (label && value) {
+      specs.push({ label, value });
+    }
+  });
+
+  if (fittingName && specs.length > 0) {
+    specifications.push({
+      type: "fitting",
+      name: fittingName,
+      data: specs
+    });
+  }
+});
+console.log("SPECIFICATIONS BEFORE SEND:", specifications);
+console.log("---- DEBUG START ----");
+
+console.log("Spec container:", document.querySelectorAll("#specContainer > div").length);
+console.log("Fitting container:", document.querySelectorAll("#fittingContainer > div").length);
+
+console.log("FINAL SPECIFICATIONS:", specifications);
+
+console.log("---- DEBUG END ----");
+formData.append("specifications", JSON.stringify(specifications || []));
+
+  
 
       
       
