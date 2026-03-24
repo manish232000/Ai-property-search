@@ -712,6 +712,13 @@ async function loadProperties(){
           <h4>${p.title}</h4>
           <p><strong>Type:</strong> ${p.property_type || 'N/A'}</p>
           <p><strong>Location:</strong> ${p.location}</p>
+
+          ${p.specifications && p.specifications.length > 0 ? `
+  <p><strong>Specifications:</strong></p>
+  <ul>
+    ${p.specifications.map(s => `<li>${s.key}: ${s.value}</li>`).join('')}
+  </ul>
+` : ''}
           ${p.bhk ? `<p><strong>BHK:</strong> ${p.bhk}</p>` : ''}
           ${p.price ? `<p><strong>Price:</strong> ₹${parseFloat(p.price).toLocaleString('en-IN')}</p>` : ''}
           ${p.area_sqft ? `<p><strong>Area:</strong> ${p.area_sqft} sqft</p>` : ''}

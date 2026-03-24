@@ -31,7 +31,7 @@ function groupProperties(rows) {
         ...rest,
         amenities: [],
         places: [],
-        specifications: {},
+        specifications: [],
           overview: {}// ✅ VERY IMPORTANT
       };
     }
@@ -70,7 +70,12 @@ function groupProperties(rows) {
         map[property_id].specifications = {};
       }
 
-      map[property_id].specifications[spec_key] = spec_value;
+      if (spec_key && spec_value) {
+  map[property_id].specifications.push({
+    key: spec_key,
+    value: spec_value
+  });
+}
     }
     if (overview_title && overview_value) {
       map[property_id].overview[overview_title] = overview_value;
