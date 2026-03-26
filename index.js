@@ -67,7 +67,7 @@ try {
 }
 
 // ------------------- Add Property -------------------
-app.post("/api/admin/property", upload.single("image"), async (req, res) => {
+app.post("/api/admin/property", upload.array("image",10), async (req, res) => {
   try {
     console.log("🔍 POST /api/admin/property called");
     console.log("📋 req.query:", JSON.stringify(req.query, null, 2));
@@ -157,9 +157,13 @@ if (nearby_places) {
 
     const BASE_URL = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
 
-const image = req.file
-  ? `${BASE_URL}/uploads/${req.file.filename}`
-  : null;
+   const image = req.files
+  ? req.files.map(file => `${BASE_URL}/uploads/${file.filename}`)
+  : [];
+
+const imageJson = JSON.stringify(image);
+
+
     console.log("17. image filename:", image);
     const owner_id = 1;
     console.log("18. owner_id:", owner_id);
@@ -184,7 +188,7 @@ const image = req.file
   townshipIdNum, projectIdNum, buildingIdNum,
   title, description, location, latNum, longNum, bhkNum,
   property_type, construction_type, construction_status,
-  priceNum, areaNum, verifiedBool, owner_id, image,
+  priceNum, areaNum, verifiedBool, owner_id, imageJson,
 
   project_units,
   project_area,
@@ -204,6 +208,19 @@ const image = req.file
     
     console.log("21. Executing SQL...");
     const result = await db.execute(sql, values);
+    const propertyId = result[0].insertId;
+    if (req.files && req.files.length > 0) {
+  const imageInsertPromises = req.files.map(file => {
+    const imageUrl = `${BASE_URL}/uploads/${file.filename}`;
+
+    return db.execute(
+      "INSERT INTO property_images (property_id, image_url) VALUES (?, ?)",
+      [propertyId, imageUrl]
+    );
+  });
+
+  await Promise.all(imageInsertPromises);
+}
     
     
     console.log("22. SQL execution result:", result);

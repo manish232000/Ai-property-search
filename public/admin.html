@@ -173,9 +173,12 @@ button:hover{background:#007bff;}
 
 <select id="verified"><option value="1">Verified</option><option value="0">Not Verified</option></select>
 <label>Upload Property Image</label>
-<input type="file" id="image" accept="image/*" onchange="previewImage(event)">
-<img id="preview">
+<input type="file" id="image" accept="image/*" multiple onchange="previewImage(event)">
+<div id="preview"></div>
+
+<button type="button" onclick="addMoreImages()">➕ Add Images</button>
 <button type="button" onclick="addProperty()">Submit</button>
+
 </form>
 </div>
 
@@ -258,7 +261,18 @@ function addSpecRow(btn) {
   container.appendChild(fitDiv);
 }
 
+  function addMoreImages() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
 
+    input.onchange = function (event) {
+        previewImage(event);
+    };
+
+    input.click();
+}
    function addSpecRow(btn) {
   const specContainer = btn.previousElementSibling;
 
@@ -495,14 +509,66 @@ async function loadAmenities() {
 
 
 
-function previewImage(event){
-    const reader=new FileReader();
-    reader.onload=function(){
-        const img=document.getElementById("preview");
-        img.src=reader.result;
-        img.style.display="block";
-    }
-    reader.readAsDataURL(event.target.files[0]);
+let selectedImages = []; // ✅ global array
+
+   function previewImage(event) {
+    const files = Array.from(event.target.files);
+
+    // ✅ add new images (replace nahi hoga)
+    selectedImages.push(...files);
+
+    renderPreview();
+
+    // ✅ same file dubara select kar sake
+    event.target.value = "";
+}
+
+      function renderPreview() {
+    const previewContainer = document.getElementById("preview");
+    previewContainer.innerHTML = "";
+
+    selectedImages.forEach((file, index) => {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const div = document.createElement("div");
+            div.style.display = "inline-block";
+            div.style.position = "relative";
+
+            // image
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.width = "80px";
+            img.style.margin = "5px";
+            img.style.borderRadius = "6px";
+
+            // remove button
+            const btn = document.createElement("button");
+            btn.innerHTML = "×";
+            btn.style.position = "absolute";
+            btn.style.top = "0";
+            btn.style.right = "0";
+            btn.style.background = "red";
+            btn.style.color = "white";
+            btn.style.border = "none";
+            btn.style.borderRadius = "50%";
+            btn.style.cursor = "pointer";
+
+            btn.onclick = () => removeImage(index);
+
+            div.appendChild(img);
+            div.appendChild(btn);
+            previewContainer.appendChild(div);
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+// 👉 remove image
+function removeImage(index) {
+    selectedImages.splice(index, 1);
+    renderPreview();
 }
 
 async function addProperty(){
@@ -522,7 +588,7 @@ async function addProperty(){
 document.querySelectorAll("#nearbyContainer > div").forEach(row => {
   const name = row.querySelector(".nearby_name").value.trim();
   const distance = row.querySelector(".nearby_distance").value.trim();
-  console.log("FINAL nearbyPlaces:", nearbyPlaces);
+   console.log("FINAL nearbyPlaces:", nearbyPlaces);
 
   if (name && distance) {
     const exists = nearbyPlaces.some(p => p.name === name && p.distance === distance);
@@ -646,8 +712,9 @@ document.querySelectorAll('input[name="amenity"]:checked').forEach(cb => {
 });
 
 formData.append("amenities", JSON.stringify(selectedAmenities));
-      const imageFile=document.getElementById("image").files[0];
-      if(imageFile) formData.append("image", imageFile);
+   selectedImages.forEach(file => {
+  formData.append("image", file);
+});
 
       console.log("Submitting form...");
       const res=await fetch("/api/admin/property",{ method:"POST", body:formData });

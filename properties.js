@@ -19,6 +19,7 @@ function groupProperties(rows) {
        overview_title,
       overview_value,
       distance_meters,
+      image_url,
       ...rest
     } = row;
 
@@ -32,7 +33,8 @@ function groupProperties(rows) {
         amenities: [],
         places: [],
         specifications: [],
-          overview: {}// ✅ VERY IMPORTANT
+          overview: {},
+          images: [] // ✅ VERY IMPORTANT
       };
     }
 
@@ -48,6 +50,12 @@ function groupProperties(rows) {
         });
       }
     }
+    // ✅ images
+if (image_url) {
+  if (!map[property_id].images.includes(image_url)) {
+    map[property_id].images.push(image_url);
+  }
+}
 
     // ✅ places
     if (place_id) {
@@ -70,13 +78,19 @@ function groupProperties(rows) {
         map[property_id].specifications = {};
       }
 
-      if (spec_key && spec_value) {
-  map[property_id].specifications.push({
-    key: spec_key,
-    value: spec_value
-  });
+    if (spec_key && spec_value) {
+  const exists = map[property_id].specifications.some(
+    s => s.key === spec_key && s.value === spec_value
+  );
+
+  if (!exists) {
+    map[property_id].specifications.push({
+      key: spec_key,
+      value: spec_value
+    });
+  }
 }
-    }
+}
     if (overview_title && overview_value) {
       map[property_id].overview[overview_title] = overview_value;
     }
@@ -111,6 +125,7 @@ function groupProperties(rows) {
   SELECT 
     p.*, 
     p.title AS property_name,
+     pi.image_url,
 
     a.amenity_id,
     a.name AS amenity_name,
@@ -150,6 +165,8 @@ function groupProperties(rows) {
 
     LEFT JOIN property_overview po 
     ON p.property_id = po.property_id
+    LEFT JOIN property_images pi 
+ON p.property_id = pi.property_id
 
 
    WHERE 1=1
@@ -300,6 +317,8 @@ function groupProperties(rows) {
 
     LEFT JOIN property_overview po 
     ON p.property_id = po.property_id
+    LEFT JOIN property_images pi 
+ON p.property_id = pi.property_id
 
   WHERE p.property_id = ?
 `;
@@ -389,6 +408,9 @@ function groupProperties(rows) {
 
     LEFT JOIN property_overview po 
     ON p.property_id = po.property_id
+
+    LEFT JOIN property_images pi 
+ON p.property_id = pi.property_id
 `;
       const params = [];
       console.log("✅ SQL query:", sql);
