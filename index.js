@@ -85,12 +85,31 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   project_size,
   launch_date,
   avg_price,
-  possession_date,
+  
   configuration,
   rera_id,
   nearby_places,
-  specifications
+  specifications,
+  amenities
     } = req.body;
+ let parsedNearby = [];
+
+if (nearby_places) {
+  try {
+    const arr = JSON.parse(nearby_places);
+
+    parsedNearby = arr.filter(
+      (item, index, self) =>
+        index === self.findIndex(
+          t =>
+            t.name.trim().toLowerCase() === item.name.trim().toLowerCase() &&
+            t.distance.trim() === item.distance.trim()
+        )
+    );
+  } catch (e) {
+    console.log("Nearby parse error:", e);
+  }
+}
     console.log("04. Destructured variables:");
     console.log("    - township_id:", township_id);
     console.log("    - project_id:", project_id);
@@ -136,7 +155,11 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
     const verifiedBool = verified === "1" ? 1 : 0;
     console.log("16. verifiedBool parsed:", verifiedBool);
 
-    const image = req.file ? req.file.filename : null;
+    const BASE_URL = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
+
+const image = req.file
+  ? `${BASE_URL}/uploads/${req.file.filename}`
+  : null;
     console.log("17. image filename:", image);
     const owner_id = 1;
     console.log("18. owner_id:", owner_id);
@@ -151,9 +174,9 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
 
     project_units, project_area, size, project_size,
     launch_date, avg_price, 
-    configuration, rera_id,nearby_places,specifications
+    configuration, rera_id,nearby_places,specifications,amenities
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?)
 `;
     console.log("19. SQL Query prepared");
 
@@ -172,9 +195,11 @@ app.post("/api/admin/property", upload.single("image"), async (req, res) => {
   
   configuration,
   rera_id,
-  nearby_places ? JSON.stringify(JSON.parse(nearby_places)) : null,
-  specifications ? specifications : JSON.stringify([])
+  JSON.stringify(parsedNearby),
+  specifications || JSON.stringify([]),
+   amenities || JSON.stringify([])
 ];
+
     console.log("20. SQL Values array:", values);
     
     console.log("21. Executing SQL...");

@@ -517,53 +517,48 @@ async function addProperty(){
           return;
       }
 
-      const nearbyPlaces = [];
+   const nearbyPlaces = [];
 
 document.querySelectorAll("#nearbyContainer > div").forEach(row => {
-  const name = row.querySelector(".nearby_name").value;
-  const distance = row.querySelector(".nearby_distance").value;
+  const name = row.querySelector(".nearby_name").value.trim();
+  const distance = row.querySelector(".nearby_distance").value.trim();
+  console.log("FINAL nearbyPlaces:", nearbyPlaces);
 
   if (name && distance) {
-    nearbyPlaces.push({
-      name,
-      distance
-    });
+    const exists = nearbyPlaces.some(p => p.name === name && p.distance === distance);
+
+    if (!exists) {
+      nearbyPlaces.push({ name, distance });
+    }
   }
 });
   const formData=new FormData();
 
-  document.querySelectorAll("#nearbyContainer > div").forEach(row => {
-  const name = row.querySelector(".nearby_name").value;
-  const distance = row.querySelector(".nearby_distance").value;
-
-  if (name && distance) {
-    nearbyPlaces.push({ name, distance });
-  }
-});
+ 
 
 formData.append("nearby_places", JSON.stringify(nearbyPlaces));
 
    const specifications = [];
 
-// ✅ FLOORS
 document.querySelectorAll("#specContainer > div").forEach(floor => {
-  const floorName = floor.querySelector(".floor_name")?.value;
-
   const specs = [];
 
   floor.querySelectorAll(".specRows > div").forEach(row => {
-    const label = row.querySelector(".spec_label")?.value;
-    const value = row.querySelector(".spec_value")?.value;
+    const label = row.querySelector(".spec_label")?.value.trim();
+    const value = row.querySelector(".spec_value")?.value.trim();
 
     if (label && value) {
-      specs.push({ label, value });
+      const exists = specs.some(s => s.label === label && s.value === value);
+
+      if (!exists) {
+        specs.push({ label, value });
+      }
     }
   });
 
   if (specs.length > 0) {
     specifications.push({
-      
-      floor: floorName ||"General",
+      floor: "General",
       data: specs
     });
   }
